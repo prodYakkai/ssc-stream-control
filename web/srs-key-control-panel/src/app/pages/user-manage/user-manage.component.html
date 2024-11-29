@@ -1,0 +1,112 @@
+<div>
+    <h2>Users</h2>
+    <nz-divider></nz-divider>
+    <form nz-form [formGroup]="userForm" (ngSubmit)="submitForm()">
+      <nz-form-item>
+        <nz-form-label [nzFor]="'name'" nzRequired
+          >Name</nz-form-label
+        >
+        <nz-form-control>
+          <input
+            nz-input
+            formControlName="name"
+            placeholder="Enter user's name"
+            maxlength="64"
+          />
+          <div
+            *ngIf="
+              userForm.get('name')?.invalid &&
+              userForm.get('name')?.dirty
+            "
+          >
+            <span
+              *ngIf="userForm.get('name')?.hasError('required')"
+              class="ant-form-item-explain-error"
+            >
+              User's name is required
+            </span>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+  
+      <nz-form-item>
+        <nz-form-label [nzFor]="'email'" nzRequired
+          >Email</nz-form-label
+        >
+        <nz-form-control>
+          <input
+            nz-input
+            formControlName="email"
+            placeholder="Enter user's email"
+          />
+          <div
+            *ngIf="
+              userForm.get('email')?.invalid &&
+              userForm.get('email')?.dirty
+            "
+          >
+            <span
+              *ngIf="userForm.get('email')?.hasError('required')"
+              class="ant-form-item-explain-error"
+            >
+            User's email is required
+        </span>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+  
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" [disabled]="!userForm.valid">
+            Create User
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+    <nz-divider></nz-divider>
+    <nz-table #basicTable [nzData]="users">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data">
+          <td>{{ data.name }}</td>
+          <td>{{ data.email }}</td>
+          <td><nz-tag [nzColor]="!data.disabled ? 'green' : 'red'">{{
+            !data.disabled ? 'Active' : 'Inactive'
+          }}</nz-tag></td>
+          <td>
+            <nz-button-group>
+              <button
+                nz-button
+                nzDanger
+                (click)="onDeactivateUser(data.id)"
+                *ngIf="!data.disabled"
+                >Deactivate</button
+              >
+              <button
+                nz-button
+                nzType="primary"
+                (click)="onActivateUser(data.id)"
+                *ngIf="data.disabled"
+                >Activate</button
+              >
+              <button
+                nz-button
+                nzDanger
+                nzType="primary"
+                (click)="onUserElevation(data.id, !data.admin)"
+                >{{data.admin ? 'De' : 'Pro'}}mote</button
+              >
+            </nz-button-group>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+  

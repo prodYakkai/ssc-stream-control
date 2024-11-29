@@ -1,0 +1,43 @@
+<div>
+    <form nz-form [formGroup]="categoryForm" (ngSubmit)="submitForm()">
+        <nz-form-item>
+          <nz-form-label [nzFor]="'name'" nzRequired>Category Name</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="name" placeholder="Enter category name" maxlength="32" (keyup)="onInputChanged($event)"/>
+            <div *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.dirty">
+              <span *ngIf="categoryForm.get('name')?.hasError('required')" class="ant-form-item-explain-error">
+                Event name is required
+              </span>
+              <span *ngIf="categoryForm.get('name')?.hasError('maxlength')" class="ant-form-item-explain-error">
+                Max length is 16 characters
+              </span>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      
+        <nz-form-item>
+          <nz-form-control>
+            <button nz-button nzType="primary" [disabled]="!categoryForm.valid">Create Event</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+      <nz-divider></nz-divider>  
+      <nz-table #basicTable [nzData]="categories">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Created At</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of basicTable.data">
+            <td>{{data.name}}</td>
+            <td>{{data.createdAt}}</td>
+            <td>
+              <a nz-button nzDanger nzType="primary" (click)="deleteCategory(data.id)">Delete</a>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>

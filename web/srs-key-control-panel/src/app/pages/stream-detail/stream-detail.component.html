@@ -1,0 +1,141 @@
+<div *ngIf="isLoading">
+  <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+</div>
+<div *ngIf="!isLoading && stream" nz-row [nzGutter]="8">
+  <div nz-col [nzSpan]="12">
+    <h2>Stream: {{ stream.name }}</h2>
+    <h3>Category: {{ stream.category.name }}</h3>
+    <div>
+      Status:
+      <nz-tag *ngIf="stream.srsIngestClientId" nzColor="green">Online</nz-tag>
+      <nz-tag *ngIf="!stream.srsIngestClientId" nzColor="red">Offline</nz-tag>
+    </div>
+    <div>
+      <label for="description">Stream description</label>
+      <textarea rows="4" nz-input [(ngModel)]="stream.description" name="description"></textarea>
+    </div>
+    <button nz-button nzType="primary" (click)="updateStream()">Update</button>
+  </div>
+  <div nz-col [nzSpan]="12">
+    <div>
+      <button
+        nz-button
+        nzType="primary"
+        nzSize="small"
+        style="margin: 10px 0"
+        nzDanger
+        (click)="rotateKey('all')"
+      >
+        Rotate All Key
+      </button>
+      <div>
+        Ingest Key:
+        <a
+          nz-button
+          nzType="primary"
+          nzSize="small"
+          (click)="rotateKey('ingest')"
+          >Rotate Key</a
+        >
+        <pre>{{ stream.ingestKey }}</pre>
+      </div>
+      <div>
+        Player Key:
+        <a nz-button nzType="primary" nzSize="small" (click)="rotateKey('view')"
+          >Rotate Key</a
+        >
+        <pre>{{ stream.viewKey }}</pre>
+      </div>
+    </div>
+    <div *ngIf="stream.srsIngestClientId">
+      Ingest Method:
+      <pre>{{ stream.ingestMethod }}</pre>
+      Ingest ID:
+      <pre>{{ stream.srsIngestClientId }}</pre>
+    </div>
+    <label nz-checkbox [(ngModel)]="disconnectOnRotateKey"
+      >Disconnect on Rotate</label
+    >
+  </div>
+  <div nz-col *ngIf="stream.srsIngestClientId" [nzSpan]="12">
+    <h3>Viewers ({{ stream.viewers.length }})</h3>
+    <nz-table #viewerTable [nzData]="stream.viewers">
+      <thead>
+        <tr>
+          <th>Client ID</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of viewerTable.data">
+          <td>{{ data.srsClientId }}</td>
+          <td>
+            <a>Kick</a>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+  <div nz-col [nzSpan]="12">
+    <h3>Destination Patch</h3>
+    <nz-select
+      nzShowSearch
+      nzAllowClear
+      nzPlaceHolder="Select a destination"
+      [(ngModel)]="selectedDestinationId"
+      (nzFocus)="onOpenDestinationSelect()"
+    >
+      <nz-option
+        *ngFor="let item of destinationPatchNode"
+        [nzLabel]="item.title"
+        [nzValue]="item.key"
+        [nzDisabled]="item.disabled"
+      ></nz-option>
+    </nz-select>
+    <label nz-checkbox [(ngModel)]="disconnectOnPatch">Reconnect</label>
+    <button
+      nz-button
+      nzType="primary"
+      (click)="patchDestination()"
+      [disabled]="!selectedDestinationId"
+    >
+      Patch
+    </button>
+  </div>
+  <div nz-col [nzSpan]="24" *ngIf="srsInfo">
+    <h3>Ingest Info</h3>
+    <nz-descriptions nzBordered [nzColumn]="2">
+      <nz-descriptions-item nzTitle="General Information" [nzSpan]="2"></nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Name">{{ srsInfo.name }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="TC URL">{{ srsInfo.tcUrl }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="URL">{{ srsInfo.url }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Live Since">{{ srsInfo.live_ms | date: 'medium' }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Clients">{{ srsInfo.clients }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Frames">{{ srsInfo.frames }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Sent Bytes">{{ srsInfo.send_bytes | fileSize }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Received Bytes">{{ srsInfo.recv_bytes | fileSize }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Kbps (Receive - Last 30s)">{{ srsInfo.kbps.recv_30s * 1000 | fileSize }}ps</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Kbps (Send - Last 30s)">{{ srsInfo.kbps.send_30s * 1000 | fileSize}}ps</nz-descriptions-item>
+  
+      <nz-descriptions-item nzTitle="Publishing Details" [nzSpan]="2"></nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Publish Active">
+        <nz-tag [nzColor]="srsInfo.publish.active ? 'green' : 'red'">
+          {{ srsInfo.publish.active ? 'Active' : 'Inactive' }}
+        </nz-tag>
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Publish CID">{{ srsInfo.publish.cid }}</nz-descriptions-item>
+  
+      <nz-descriptions-item nzTitle="Video Details" [nzSpan]="2"></nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Codec">{{ srsInfo.video.codec }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Profile">{{ srsInfo.video.profile }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Level">{{ srsInfo.video.level }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Resolution">{{ srsInfo.video.width }} x {{ srsInfo.video.height }}</nz-descriptions-item>
+  
+      <nz-descriptions-item nzTitle="Audio Details" [nzSpan]="2"></nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Codec">{{ srsInfo.audio.codec }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Sample Rate">{{ srsInfo.audio.sample_rate }} Hz</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Channels">{{ srsInfo.audio.channel }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Profile">{{ srsInfo.audio.profile }}</nz-descriptions-item>
+    </nz-descriptions>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+{
+    "folders": [
+      {
+        "path": "."
+      },
+      {
+        "path": "web/srs-key-control-panel"
+      }
+    ],
+    "settings": {
+      "files.exclude": {
+        "web": true,
+      },
+      "cSpell.words": [
+        "antd",
+        "appcheck",
+        "firestore",
+        "immer",
+        "prodyakkaiexpo",
+        "unsnake",
+        "whep"
+      ],
+      "psi-header.config": {
+        "forceToTop": true,
+        "blankLinesAfter": 1,
+        "spacesBetweenYears": true,
+        "license": "Apache-2.0",
+        "company": "Shengming Yuan",
+        "creationDateZero": "asIs"
+      },
+      "psi-header.templates": [
+        {
+            "language": "*",
+            "template": [
+                "File: <<filename>>",
+                "Project: <<projectname>>",
+                "-----",
+                "Copyright (C) <<year>> <<company>> - All rights reserved.",
+                "",
+                "You may use, distribute and modify this code under the terms of the <<licensename>> license.",
+                "",
+                "You should have received a copy of the <<licensename>> License along with this program.",
+                "If not, see <<licenseurl>>.",
+                ""
+            ]
+        }
+    ]
+    },
+    "extensions": {
+      "recommendations": [
+        "psioniq.psi-header"
+      ]
+    }
+}

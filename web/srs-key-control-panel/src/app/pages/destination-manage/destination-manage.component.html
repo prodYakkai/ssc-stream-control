@@ -1,0 +1,120 @@
+<div>
+  <h2>Destination & Patching</h2>
+  <nz-divider></nz-divider>
+  <form nz-form [formGroup]="destinationForm" (ngSubmit)="submitForm()">
+    <nz-form-item>
+      <nz-form-label [nzFor]="'name'" nzRequired
+        >Destination Name</nz-form-label
+      >
+      <nz-form-control>
+        <input
+          nz-input
+          formControlName="name"
+          placeholder="Enter destination name"
+          maxlength="16"
+        />
+        <div
+          *ngIf="
+            destinationForm.get('name')?.invalid &&
+            destinationForm.get('name')?.dirty
+          "
+        >
+          <span
+            *ngIf="destinationForm.get('name')?.hasError('required')"
+            class="ant-form-item-explain-error"
+          >
+            Destination name is required
+          </span>
+          <span
+            *ngIf="destinationForm.get('name')?.hasError('maxlength')"
+            class="ant-form-item-explain-error"
+          >
+            Max length is 16 characters
+          </span>
+        </div>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzFor]="'description'"
+        >Destination Description</nz-form-label
+      >
+      <nz-form-control>
+        <textarea
+          nz-input
+          formControlName="description"
+          placeholder="Enter event description"
+          maxlength="100"
+        ></textarea>
+        <div
+          *ngIf="
+            destinationForm.get('description')?.invalid &&
+            destinationForm.get('description')?.dirty
+          "
+        >
+          <span
+            *ngIf="destinationForm.get('description')?.hasError('maxlength')"
+            class="ant-form-item-explain-error"
+          >
+            Max length is 100 characters
+          </span>
+        </div>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-control>
+        <button nz-button nzType="primary" [disabled]="!destinationForm.valid">
+          Create Destination
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+  <nz-divider></nz-divider>
+  <nz-table #basicTable [nzData]="destinations">
+    <thead>
+      <tr>
+        <th>Destination Name</th>
+        <th>Patched From</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td>{{ data.name }}</td>
+        <td>
+          <span
+            nz-icon
+            nzType="arrow-left"
+            nzTheme="outline"
+            class="patch-arrow"
+          ></span>
+          <span *ngIf="data.stream">
+            <a [routerLink]="['/stream', data.stream.id]">{{data.stream.category.name}}/{{
+              data.stream.name
+            }}</a>
+          </span>
+          <span *ngIf="!data.stream">None</span>
+        </td>
+        <td>
+          <nz-button-group>
+            <button
+              nz-button
+              nzType="primary"
+              (click)="unpatchDestination(data.stream.id)"
+              *ngIf="data.stream"
+              >Unpatch</button
+            >
+            <button
+              nz-button
+              nzDanger
+              nzType="primary"
+              (click)="deleteDestination(data.id)"
+              >Delete</button
+            >
+          </nz-button-group>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</div>

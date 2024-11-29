@@ -1,0 +1,17 @@
+<nz-modal
+  [(nzVisible)]="isVisible"
+  nzTitle="Request to Generate Streaming Master Sheet"
+  (nzOnCancel)="handleCancel()"
+  (nzOnOk)="handleOk()"
+  [nzOkLoading]="isLoading"
+>
+  <ng-container *nzModalContent>
+    <p>
+      Are you sure you want to generate the streaming master sheet? This will
+      take a while. Once generated, a new tab will open with the master sheet.
+    </p>
+    <nz-input-group nzAddOnBefore="Valid for" nzAddOnAfter="hours">
+      <nz-input-number [(ngModel)]="expireHours" [nzStep]="1"  style="width: 100%"></nz-input-number>
+    </nz-input-group>
+  </ng-container>
+</nz-modal>

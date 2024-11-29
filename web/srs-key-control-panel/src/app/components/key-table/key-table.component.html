@@ -1,0 +1,151 @@
+<div>
+  <nz-table #table [nzData]="keys" style="overflow: auto">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Keys</th>
+        <th>Generated On</th>
+        <th>Memo</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <nz-spin *ngIf="isLoading" nzTip="Loading..."></nz-spin>
+    <tbody *ngIf="!isLoading">
+      <tr *ngFor="let data of table.data; index as i">
+        <td>{{ data.name }}</td>
+        <td>
+          <div>Ingest: <code>{{ data.ingestKey }}</code></div>
+          <div>Player: <code>{{ data.viewKey }}</code></div>
+        </td>
+        <td>
+          {{ data.createdAt| date : "yyyy-MM-dd HH:mm:ss" }}
+        </td>
+        <td>
+          {{data.description || "-"}}
+        </td>
+        <td>
+          <nz-tag *ngIf="data.srsIngestClientId" nzColor="green">
+            <span nz-tooltip nzTooltipTitle="ID: {{ data.srsIngestClientId }}"
+              >Online</span
+            >
+          </nz-tag>
+          <nz-tag *ngIf="!data.srsIngestClientId" nzColor="red">Offline</nz-tag>
+        </td>
+        <td>
+          <a
+            nz-button
+            nzType="link"
+            (click)="copyURL(data)"
+            (contextmenu)="showStreamUrl(data, $event)"
+            >Ingest Key</a
+          >
+          <nz-divider nzType="vertical" *ngIf="data.srsIngestClientId"></nz-divider>
+          <a
+            nz-button
+            nzType="link"
+            href="{{ playerHost }}/play?key={{ data.viewKey }}"
+            target="_blank"
+            (contextmenu)="showPlayUrl(data.viewKey, $event)"
+          >
+            Preview</a
+          >
+          <nz-divider nzType="vertical" *ngIf="tableSettings.enableRevokeKey"></nz-divider>
+          <a
+            *ngIf="tableSettings.enableRevokeKey"
+            nz-button
+            nzDanger
+            nzType="primary"
+            (click)="showRevokeKeyModal(data, $event)"
+            >Revoke</a
+          >
+          <nz-divider nzType="vertical"></nz-divider>
+          <a
+            nz-button
+            nzType="link"
+            [routerLink]="['/stream/', data.id]"
+          >
+            Detail</a
+          >
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+  <p>Last Updated on {{ lastUpdatedOn | date : "yyyy-MM-dd HH:mm:ss" }}</p>
+</div>
+
+<nz-modal
+  [(nzVisible)]="isStreamUrlModalVisible"
+  nzTitle="Stream Push URLS"
+  (nzOnOk)="handleOk()"
+  (nzOnCancel)="handleOk()"
+>
+  <ng-container *nzModalContent>
+
+
+    <p>RTMP :</p>
+    <span nz-typography
+      ><pre>rtmp://{{ environment.streaming.host }}:1935/live</pre></span
+    >
+    <p>RTMP Key:</p>
+    <span nz-typography
+      ><pre>{{modalURLParams.category + '-' + modalURLParams.name + '?key=' + modalURLParams.ingestKey}}</pre></span
+    >
+    <nz-divider></nz-divider>
+
+    <p>WHIP :</p>
+    <span nz-typography
+      ><pre>{{ modalURLParams.webrtcUrl}}</pre></span
+    >
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="isRevokeKeyModalVisible"
+  nzTitle="Are you sure to revoke this key?"
+  (nzOnOk)="handleRevokeKey()"
+  (nzOnCancel)="handleOk()"
+  [nzOkLoading]="revokeKeyParams.isRevoking"
+>
+  <ng-container *nzModalContent>
+    <p>
+      Once the key is revoked,
+      <span *ngIf="revokeKeyParams.kickClient"
+        >the stream client will be <b>KICKED</b> and </span
+      >the key will be deleted.
+    </p>
+    <label
+      nz-checkbox
+      [(ngModel)]="revokeKeyParams.kickClient"
+      [nzDisabled]="!revokeKeyParams.canKickClient"
+      >Kick Client</label
+    >
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="isPlayUrlModalVisible"
+  nzTitle="Stream Play URLS"
+  (nzOnOk)="handleOk()"
+  (nzOnCancel)="handleOk()"
+>
+  <ng-container *nzModalContent>
+    <p>View Key (Web Player):</p>
+    <span nz-typography
+      ><pre>{{ modalURLParams.viewKey }}</pre></span
+    >
+
+    <nz-divider></nz-divider>
+    <p>RTMP:</p>
+    <span nz-typography
+      ><pre>{{ modalURLParams.rtmpUrl }}</pre></span
+    >
+
+    <nz-divider></nz-divider>
+
+    <p>WHEP:</p>
+    <span nz-typography
+      ><pre>{{ modalURLParams.webrtcUrl }}</pre></span
+    >
+  </ng-container>
+</nz-modal>

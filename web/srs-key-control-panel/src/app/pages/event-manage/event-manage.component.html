@@ -1,0 +1,68 @@
+<div>
+<!-- event-creation-form.component.html -->
+<form nz-form [formGroup]="eventForm" (ngSubmit)="submitForm()">
+    <nz-form-item>
+      <nz-form-label [nzFor]="'name'" nzRequired>Event Name</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="name" placeholder="Enter event name" maxlength="32" />
+        <div *ngIf="eventForm.get('name')?.invalid && eventForm.get('name')?.dirty">
+          <span *ngIf="eventForm.get('name')?.hasError('required')" class="ant-form-item-explain-error">
+            Event name is required
+          </span>
+          <span *ngIf="eventForm.get('name')?.hasError('maxlength')" class="ant-form-item-explain-error">
+            Max length is 32 characters
+          </span>
+        </div>
+      </nz-form-control>
+    </nz-form-item>
+  
+    <nz-form-item>
+      <nz-form-label [nzFor]="'description'">Event Description</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input formControlName="description" placeholder="Enter event description" maxlength="100"></textarea>
+        <div *ngIf="eventForm.get('description')?.invalid && eventForm.get('description')?.dirty">
+          <span *ngIf="eventForm.get('description')?.hasError('maxlength')" class="ant-form-item-explain-error">
+            Max length is 100 characters
+          </span>
+        </div>
+      </nz-form-control>
+    </nz-form-item>
+  
+    <nz-form-item>
+      <nz-form-control>
+        <button nz-button nzType="primary" [disabled]="!eventForm.valid">Create Event</button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+  <nz-divider></nz-divider>  
+  <nz-table #basicTable [nzData]="events">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Overview</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td>{{data.name}}</td>
+        <td>{{data.description || 'N/A'}}</td>
+        <td>
+          <p>
+            Total Categories: {{data.categories.length}}
+          </p>
+          <p>
+            Total Streams:  {{data | eventStreamReducer}}
+          </p>
+        </td>
+        <td>
+          <span *ngIf="currentEventId === data.id">Current Event</span>
+          <a (click)="setCurrentEvent(data.id)" *ngIf="currentEventId !== data.id">Set as Current Event</a>
+          <nz-divider nzType="vertical"></nz-divider>
+          <a nz-button nzDanger nzType="primary">Delete</a>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</div>

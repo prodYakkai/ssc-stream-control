@@ -1,0 +1,67 @@
+<div>
+  <h2>Panel Settings</h2>
+  <nz-divider></nz-divider>
+  <div nz-row>
+    <div nz-col nzSpan="12">
+      <nz-card nzTitle="Key Table Settings">
+        <label
+          nz-checkbox
+          [(ngModel)]="tableSettings.enableRevokeKey"
+          (ngModelChange)="onUpdateTableSettings()"
+          >Enable Revoke Key Function</label
+        >
+        <br />
+      </nz-card>
+    </div>
+    <div nz-col nzSpan="12">
+      <nz-card nzTitle="Master Sheet Generation">
+        <a
+          nz-button
+          nzType="primary"
+          [href]="locallyCachedMasterSheet"
+          [disabled]="!locallyCachedMasterSheet"
+          >View Locally Cached Master Sheet</a
+        >
+        <button
+          nz-button
+          nzType="primary"
+          nzDanger
+          [disabled]="!locallyCachedMasterSheet"
+          (click)="onClearLocalCachedMasterSheet()"
+        >
+          Remove Locally Cached Master Sheet
+        </button>
+      </nz-card>
+    </div>
+    <div nz-col nzSpan="12">
+      <nz-card nzTitle="Preview Key Generation">
+        <nz-input-group nzAddOnBefore="Valid for" nzAddOnAfter="Hours">
+          <nz-input-number
+            [(ngModel)]="previewKeyValidTime"
+            style="width: 100%"
+            [nzStep]="1"
+            (ngModelChange)="onChangePreviewKeyValidTime()"
+          ></nz-input-number>
+        </nz-input-group>
+        <br />
+        <p>
+          All preview key will relative to UTC time zone.
+        </p>
+      </nz-card>
+    </div>
+    <div nz-col nzSpan="12">
+      <nz-card nzTitle="Stream Key Generation">
+        <label
+          nz-checkbox
+          [(ngModel)]="clearKeyGenModalAfterCreate"
+          (ngModelChange)="onStreamKeyGeneration()"
+          >Clear key gen modal values after generation</label>
+      </nz-card>
+    </div>
+    <div nz-col nzSpan="12">
+      <nz-card nzTitle="Diagnostic">
+        <a nz-button nzType="primary" [href]="environment.playerHost+'/dig'">Stack Network Diagnostic</a>
+      </nz-card>
+    </div>
+  </div>
+</div>
