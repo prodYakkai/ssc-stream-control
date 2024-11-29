@@ -1,5 +1,5 @@
 export const environment = {
-  apiHost: 'https://control-api.blackcompany.tv',
+  apiHost: 'https://scc.blackcompany.tv',
   playerHost: 'https://play.blackcompany.tv',
   streaming: {
     host: 'stream.blackcompany.tv',
