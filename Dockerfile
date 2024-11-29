@@ -24,6 +24,7 @@ WORKDIR /app
 
 # Install app dependencies
 COPY package.json yarn.lock ./
+COPY --from=builder /app/prisma ./prisma
 
 RUN yarn install --production --frozen-lockfile
 
