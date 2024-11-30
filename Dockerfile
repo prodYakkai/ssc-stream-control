@@ -31,6 +31,7 @@ RUN yarn install --production --frozen-lockfile
 RUN yarn generate:prisma
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/bin ./bin
 
 EXPOSE 3005
 CMD [ "node", "dist/index.js" ]

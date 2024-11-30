@@ -34,7 +34,7 @@ jobs:
       run: npm run build
 
     - name: Copy files
-      run: mv -r ./dist/srs-key-control-panel/browser/* ./dist/srs-key-control-panel/
+      run: mv ./dist/srs-key-control-panel/browser/* ./dist/srs-key-control-panel/
 
     - name: Deploy
       if: success()

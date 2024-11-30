@@ -1,0 +1,7 @@
+#!/bin/sh
+
+yarn prisma db seed 
+
+node dist/index.js
+
+$@

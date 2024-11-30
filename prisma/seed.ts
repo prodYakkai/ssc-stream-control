@@ -1,14 +1,18 @@
 import { PrismaClient } from '@prisma/client';
+import { config as initEnv } from 'dotenv';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config();
+initEnv();
 const prisma = new PrismaClient();
 
 async function main() {
   const admin = await prisma.user.upsert({
-    where: { email: 'shen@blackcompany.tv'},
+    where: { email: process.env.ADMIN_EMAIL || '' },
     update: {},
     create: {
-        email: 'shen@blackcompany.tv',
-        thirdPartyId: '100742731635280256742',
-        name: 'Shen',
+        email: process.env.ADMIN_EMAIL || '',
+        thirdPartyId: '100000000000000000000',
+        name: 'Admin User',
         admin: true,
         disabled: false
     }
