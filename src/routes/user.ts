@@ -44,7 +44,7 @@ userRouter.post('/elevator', async (req: Request, res: Response) => {
     }
     const updatedUser = await prisma.user.update({
         where: {
-            email: floor
+            id: user.id
         },
         data: {
             admin: call as boolean

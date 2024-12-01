@@ -84,6 +84,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   private loadVhosts() {
+    if (this.eventService.getLocalCurrentEvent() === null) {
+      this.headerErrorMsg = 'Please select an event to continue';
+      return;
+    }
+
     this.isLoading = true;
     this.categoryService.getCategories(this.eventService.getLocalCurrentEvent()).subscribe({
       next: (response) => {

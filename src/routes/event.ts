@@ -11,10 +11,20 @@
  * 
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '..';
+import resWrap from '../utils/responseWrapper';
 
 const eventRouter = Router();
+
+const ensureEventId = (req: Request, res: Response, next: NextFunction) => {
+    const { eventId } = req.params;
+    if (!eventId) {
+        res.status(400).json(resWrap({}, 1, 'Event ID is required'));
+        return;
+    }
+    next();
+}
 
 // create a new event
 eventRouter.post('/', async (req: Request, res: Response) => {
@@ -31,9 +41,13 @@ eventRouter.post('/', async (req: Request, res: Response) => {
     });
 });
 
-eventRouter.post('/:eventId/destination', async (req: Request, res: Response) => {
+eventRouter.post('/:eventId/destination', ensureEventId, async (req: Request, res: Response) => {
     const { eventId } = req.params;
     const { name, description } = req.body;
+    if (!name || !description) {
+        res.status(400).json(resWrap({}, 1, 'Name and description are required'));
+        return;
+    }
     const destination = await prisma.reservedDestination.create({
         data: {
             name,
@@ -92,11 +106,11 @@ eventRouter.get('/:id/destination', async (req: Request, res: Response) => {
 
 
 // get a single event
-eventRouter.get('/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
+eventRouter.get('/:eventId', ensureEventId, async (req: Request, res: Response) => {
+    const { eventId } = req.params;
     const event = await prisma.event.findUnique({
         where: {
-            id
+            id: eventId
         }
     });
     res.json({
@@ -105,7 +119,7 @@ eventRouter.get('/:id', async (req: Request, res: Response) => {
     });
 });
 
-eventRouter.get('/:eventId/destination/:id', async (req: Request, res: Response) => {
+eventRouter.get('/:eventId/destination/:id',ensureEventId, async (req: Request, res: Response) => {
     const { id } = req.params;
     const destination = await prisma.reservedDestination.findUnique({
         where: {

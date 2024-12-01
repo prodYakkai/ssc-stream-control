@@ -13,6 +13,7 @@
 
 import { Router, Request, Response } from 'express';
 import { prisma } from '..';
+import resWrap from '../utils/responseWrapper';
 
 const categoryRouter = Router();
 
@@ -38,6 +39,9 @@ categoryRouter.post('/', async (req: Request, res: Response) => {
 // get all categories
 categoryRouter.get('/event/:eventId', async (req: Request, res: Response) => {
     const { eventId } = req.params;
+    if (!eventId) {
+        res.status(400).json(resWrap({}, 1, 'Event ID is required'));
+    }
     const categories = await prisma.category.findMany({
         where: {
             eventId: eventId as string

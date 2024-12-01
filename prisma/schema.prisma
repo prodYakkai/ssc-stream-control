@@ -34,12 +34,16 @@ model Event {
 }
 
 model EventBranding {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  eventId   String   @unique @db.ObjectId
-  logo      String?
-  favicon   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  eventId        String   @unique @db.ObjectId
+  logo           String?
+  favicon        String?
+
+  primaryColor   String?
+  secondaryColor String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relations
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
