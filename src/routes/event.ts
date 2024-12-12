@@ -44,8 +44,8 @@ eventRouter.post('/', async (req: Request, res: Response) => {
 eventRouter.post('/:eventId/destination', ensureEventId, async (req: Request, res: Response) => {
     const { eventId } = req.params;
     const { name, description } = req.body;
-    if (!name || !description) {
-        res.status(400).json(resWrap({}, 1, 'Name and description are required'));
+    if (!name) {
+        res.status(400).json(resWrap({}, 1, 'Name is required'));
         return;
     }
     const destination = await prisma.reservedDestination.create({
