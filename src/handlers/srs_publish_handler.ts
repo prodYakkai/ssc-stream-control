@@ -72,5 +72,13 @@ export const SrsPublishHandler = async (payload: SrsPublish, resolve: (T: number
 
     resolve(0);
 
+    prisma.streamHistory.create({
+        data: {
+            streamId: streamDoc.id,
+            srsClientId: payload.client_id,
+            ingestMethod: protocol.toUpperCase() as IngestMethod,
+        }
+    });
+
 
 };

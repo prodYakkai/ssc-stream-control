@@ -32,6 +32,7 @@ export const serviceAccountGAuth = new GoogleAuth({
   scopes: [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/groups'
   ],
 });
 export const prisma = new PrismaClient();

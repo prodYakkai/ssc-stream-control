@@ -119,44 +119,12 @@ streamRouter.post(
 // revoke a key within a category
 streamRouter.delete('/id/:streamId', requireAdmin, async (req: Request, res: Response) => {
   const { streamId } = req.params;
-  const { revokePassword, forceKickClient } = req.query;
+  const {forceKickClient } = req.query;
   if (!streamId) {
     res.status(400);
     res.json({
       message: 'streamId is required',
       code: -1,
-    });
-    return;
-  }
-
-  if (!revokePassword) {
-    res.status(400);
-    res.json({
-      message: 'revokePassword is required',
-      code: -1,
-    });
-    logAuditTrail({
-      action: AuditTrailAction.KickStream,
-      // @ts-expect-error already checked at guard
-      actor: req.user?.email,
-      target: `${streamId}`,
-      success: false,
-    });
-    return;
-  }
-
-  if (revokePassword !== process.env.REVOKE_PASSWORD) {
-    res.status(400);
-    res.json({
-      message: 'revokePassword is incorrect',
-      code: -1,
-    });
-    logAuditTrail({
-      action: AuditTrailAction.KickStream,
-      // @ts-expect-error already checked at guard
-      actor: req.user?.email,
-      target: `${streamId}`,
-      success: false,
     });
     return;
   }

@@ -34,16 +34,16 @@ model Event {
 }
 
 model EventBranding {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  eventId        String   @unique @db.ObjectId
-  logo           String?
-  favicon        String?
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  eventId String  @unique @db.ObjectId
+  logo    String?
+  favicon String?
 
   primaryColor   String?
   secondaryColor String?
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -76,6 +76,8 @@ model Stream {
   event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   destination ReservedDestination?
+
+  StreamHistory StreamHistory[]
 }
 
 model ReservedDestination {
@@ -89,13 +91,14 @@ model ReservedDestination {
 
   name        String  @unique
   description String?
+  redirect    Boolean @default(false)
 
   createdAt DateTime @default(now())
 }
 
 model Category {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
+  name      String   @unique
   eventId   String   @db.ObjectId
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -128,6 +131,19 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model StreamHistory {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  srsClientId  String       @unique
+  ingestMethod IngestMethod
+
+  createdAt DateTime  @default(now())
+  stoppedAt DateTime?
+
+  streamId String @db.ObjectId
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
 }
 
 model AuditTrail {

@@ -32,9 +32,26 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
     return;
   }
 
+  const destinationViewProbe = await prisma.reservedDestination.findFirst({
+    where: {
+      id: viewKey.toString(),
+    },
+    select: {
+      redirect: false,
+      streamId: true,
+    }
+  });
+
   const streamData = await prisma.stream.findFirst({
     where: {
-      viewKey: viewKey.toString(),
+      OR: [
+        {
+          viewKey: viewKey.toString(),
+        },
+        {
+          id: destinationViewProbe?.streamId || '',
+        },
+      ]
     },
     include: {
       destination: true,
@@ -54,7 +71,7 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
   });
 
   if (streamData === null) {
-    res.status(500).json({ message: 'Internal server error?', code: -1 });
+    res.status(500).json({ message: 'Internal server error question mark?', code: -1 });
     return;
   }
 
@@ -63,10 +80,6 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
   if (previewHourTime <= 0 ){
     res.status(400).json({ message: 'Invalid preview key valid time, must greater than 0 hours.', code: -1 });
     return;
-  }
-
-  if (streamData.destination) {
-    /// TODO: ?? maybe redirect them to the destination url?
   }
 
   // sanitize the stream data
@@ -80,6 +93,7 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
     message: 'success',
     code: 0,
     data: {
+      resolveNext: streamData.destination !== null,
       expire: playbackSignResult.expire,
       sign: playbackSignResult.sign,
       start: playbackSignResult.start,

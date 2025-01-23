@@ -39,7 +39,7 @@ export const SrsUnpublishHandler = async (payload: SrsPublish) => {
     }
 
     console.log(`Un-assigning stream ${payload.client_id} from stream ${payload.stream}`);
-    await prisma.stream.update({
+    prisma.stream.update({
         where: {
             id: streamDoc.id
         },
@@ -49,5 +49,14 @@ export const SrsUnpublishHandler = async (payload: SrsPublish) => {
             ingestMethod: undefined,
         }
     });
+
+    prisma.streamHistory.update({
+        where: {
+            id: streamDoc.id,
+        },
+        data: {
+            stoppedAt: new Date(),
+        }
+    })
 
 };

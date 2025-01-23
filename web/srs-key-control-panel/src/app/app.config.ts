@@ -50,7 +50,12 @@ export const appConfig: ApplicationConfig = {
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider(environment.googleClientId,
               {
-                oneTapEnabled: false
+                oneTapEnabled: false,
+                scopes: [
+                  'https://apps-apis.google.com/a/feeds/groups/',
+                  'https://www.googleapis.com/auth/groups',
+                  'openid',
+                ]
               }
             ),
           },
