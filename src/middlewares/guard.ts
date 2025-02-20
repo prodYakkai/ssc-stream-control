@@ -11,56 +11,14 @@
  */
 
 import { NextFunction, Request, Response } from 'express';
-import { gAuthClient, prisma } from '..';
-import { ExtendedTokenPayload } from '../types';
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-    if (req.headers.authorization === undefined) {
-        reject(res);
-        return;
-    }
     try {
-        const ticket = await gAuthClient.verifyIdToken({
-            idToken: req.headers.authorization.split(' ')[1],
-            audience: process.env.GOOGLE_CLIENT_ID
-        });
-        const googlePayload = ticket.getPayload();
-        // console.log(payload);
-        if (googlePayload === undefined) {
-            reject(res);
-            return;
-        }
-    
-        const email = googlePayload.email;
-        if (email === undefined) {
+        if (req.session.user === undefined) {
             reject(res);
             return;
         }
 
-        const userData = await prisma.user.findUnique({
-            where: {
-                email: googlePayload.email,
-                disabled: false
-            },
-            select: {
-                email: true,
-                thirdPartyId: true,
-                admin: true
-            }
-        });
-
-        if (userData === null) {
-            reject(res);
-            return;
-        }
-
-        const payload: ExtendedTokenPayload = {
-            ...googlePayload,
-            isAdmin: userData.admin || false
-        };
-    
-        // @ts-expect-error ts... what can I say...
-        (req as unknown).user = payload;
         next();
     } catch (e) {
         console.error(e);
@@ -72,12 +30,12 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        if (req.user === undefined) {
+        if (req.session.user === undefined) {
             reject(res);
             return;
         }
 
-        if (!req.user.isAdmin) {
+        if (!req.session.user.isAdmin) {
             reject(res);
             return;
         }

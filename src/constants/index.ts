@@ -15,16 +15,25 @@ export const PlayerHost = 'https://play.blackcompany.tv';
 export const MasterSheetShareList = [
     {
         name: 'AV Group',
-        email: 'av@blackcompany.tv',
+        email: 'av@dev.blackcompany.tv',
         isGroup: true,
         role: 'reader',
     },
     {
         name: 'IT Group',
-        email: 'it@blackcompany.tv',
+        email: 'it@dev.blackcompany.tv',
         isGroup: true,
         role: 'reader',
     },
 ];
 
 export const REDACTED = '[REDACTED]';
+
+export const GoogleAuthScopes = [
+    'https://apps-apis.google.com/a/feeds/groups/',
+    'https://www.googleapis.com/auth/groups',
+    'https://www.googleapis.com/auth/admin.directory.group',
+    'openid',
+    'profile',
+    'email'
+];

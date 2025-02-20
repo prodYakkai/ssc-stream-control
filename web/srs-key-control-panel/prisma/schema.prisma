@@ -26,6 +26,9 @@ model Event {
   branding   EventBranding?
   brandingId String?        @db.ObjectId
 
+  ads   EventAd?
+  adsId String? @db.ObjectId
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -34,10 +37,32 @@ model Event {
 }
 
 model EventBranding {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  eventId   String   @unique @db.ObjectId
-  logo      String?
-  favicon   String?
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  eventId String  @unique @db.ObjectId
+  logoUrl    String?
+  faviconUrl String?
+
+  customFooter String?
+
+  primaryColor   String?
+  secondaryColor String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+
+model EventAd {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  eventId String  @unique @db.ObjectId
+
+  imageURL String?
+
+  position AdPosition @default(UNKNOWN)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -58,6 +83,8 @@ model Stream {
   ingestProtected Boolean @default(false)
   viewProtected   Boolean @default(false)
 
+  viewLocked Boolean @default(false)
+
   description String?
   name        String  @unique
 
@@ -72,6 +99,8 @@ model Stream {
   event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   destination ReservedDestination?
+
+  StreamHistory StreamHistory[]
 }
 
 model ReservedDestination {
@@ -85,13 +114,14 @@ model ReservedDestination {
 
   name        String  @unique
   description String?
+  redirect    Boolean @default(false)
 
   createdAt DateTime @default(now())
 }
 
 model Category {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
+  name      String   @unique
   eventId   String   @db.ObjectId
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -118,12 +148,26 @@ model User {
 
   admin    Boolean @default(false)
   disabled Boolean @default(false)
+  groups Boolean @default(false)
 
   eventIds String[] @db.ObjectId
   events   Event[]  @relation(fields: [eventIds], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model StreamHistory {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  srsClientId  String       @unique
+  ingestMethod IngestMethod
+
+  createdAt DateTime  @default(now())
+  stoppedAt DateTime?
+
+  streamId String @db.ObjectId
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
 }
 
 model AuditTrail {
@@ -148,4 +192,12 @@ enum AuditTrailAction {
   RevokeKey
   KickStream
   KickClient
+}
+
+enum AdPosition {
+  UNKNOWN
+  TOP
+  BOTTOM
+  LEFT
+  RIGHT
 }

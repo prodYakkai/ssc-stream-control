@@ -15,6 +15,7 @@ import { Router, Request, Response } from 'express';
 import { getUrlSignHash } from '../utils/urlConstruct';
 import { prisma } from '..';
 import { REDACTED } from '../constants';
+import resWrap from '../utils/responseWrapper';
 
 const feedRouter = Router();
 
@@ -32,41 +33,46 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
     return;
   }
 
-  const destinationViewProbe = await prisma.reservedDestination.findFirst({
-    where: {
-      id: viewKey.toString(),
-    },
-    select: {
-      redirect: false,
-      streamId: true,
-    }
-  });
+  const streamData = await prisma.$transaction(async (tx) => {
+    // 1. probe the viewKey on destination
+    const destinationProbe = await tx.reservedDestination.findFirst({
+      where: {
+        id: viewKey.toString(),
+      },
+      select: {
+        streamId: true
+      }
+    }).catch(() => null);
+    // if the viewKey is not found, return null
 
-  const streamData = await prisma.stream.findFirst({
-    where: {
-      OR: [
-        {
-          viewKey: viewKey.toString(),
-        },
-        {
-          id: destinationViewProbe?.streamId || '',
-        },
-      ]
-    },
-    include: {
-      destination: true,
-      category: {
-        select: {
-          name: true,
-          id: true,
-        }
+    // 2. fetch stream data
+    const streamData = await tx.stream.findFirst({
+      where: {
+        OR: [
+          {
+            viewKey: viewKey.toString(),
+          },
+          {
+            id: destinationProbe?.streamId || undefined,
+          },
+        ]
       },
-      event: {
-        select: {
-          name: true,
-          id: true,
-        }
-      },
+      include: {
+        category: true,
+        event: true,
+      }
+    });
+
+    if (!streamData) {
+      return null;
+    }
+
+    return {
+      ...streamData,
+      destination: destinationProbe ? {
+        streamId: destinationProbe.streamId,
+        viewKey: viewKey.toString(),
+      } : null,
     }
   });
 
@@ -100,6 +106,35 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
       ...streamData,
     }
   });
+});
+
+feedRouter.get('/event/:eventId', async (req: Request, res: Response) => {
+  const { eventId } = req.params;
+
+  if (!eventId) {
+    res.status(400).json({ message: 'Missing event id', code: -1 });
+    return;
+  }
+
+  // get all event branding
+  const eventBranding = await prisma.eventBranding.findMany({
+    where: {
+      eventId,
+    }
+  });
+
+  // get all eventAds
+  const eventAds = await prisma.eventAd.findMany({
+    where: {
+      eventId,
+    }
+  });
+
+  res.json(resWrap({
+    eventBranding,
+    eventPromo: eventAds,
+  }));
+  
 });
 
 export default feedRouter;

@@ -66,19 +66,7 @@ async function main() {
       name: 'default_category',
     }
   });
-
-  const demoStream = await prisma.stream.upsert({
-    where: { id: '674aaaaa0d1e567bf931bae3'},
-    update: {},
-    create: {
-      id: '674aaaaa0d1e567bf931bae3',
-      name: 'Demo Stream',
-      description: 'This is a demo stream.',
-      categoryId: defaultCategory.id,
-      eventId: defaultEvent.id,
-    }
-  });
-  console.log({ admin, defaultEvent, defaultEventBranding, defaultCategory, demoStream });
+  console.log({ admin, defaultEvent, defaultEventBranding, defaultCategory });
 }
 main()
   .then(async () => {

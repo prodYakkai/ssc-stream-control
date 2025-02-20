@@ -59,26 +59,36 @@ export const SrsPublishHandler = async (payload: SrsPublish, resolve: (T: number
     if (payload.tcUrl === ''){
         protocol = IngestMethod.WHIP;
     }
-    await prisma.stream.update({
-        where: {
-            id: streamDoc.id
-        },
-        data: {
-            srsIngestStreamId: payload.stream_id,
-            srsIngestClientId: payload.client_id,
-            ingestMethod: protocol.toUpperCase() as IngestMethod
-        }
+
+    const out = await prisma.$transaction(async (tx) => {
+        // 1. update stream
+        await tx.stream.update({
+            where: {
+                id: streamDoc.id
+            },
+            data: {
+                srsIngestClientId: payload.client_id,
+                srsIngestStreamId: payload.stream,
+                ingestMethod: protocol.toUpperCase() as IngestMethod,
+            }
+        });
+        // 2. create a new stream history
+        await tx.streamHistory.create({
+            data: {
+                streamId: streamDoc.id,
+                srsClientId: payload.client_id,
+                ingestMethod: protocol.toUpperCase() as IngestMethod,
+            }
+        });
+
+        return true;
+    }).catch((e) => {
+        console.error(e);
+        reject();
+        return false;
     });
+
+    console.log(out);
 
     resolve(0);
-
-    prisma.streamHistory.create({
-        data: {
-            streamId: streamDoc.id,
-            srsClientId: payload.client_id,
-            ingestMethod: protocol.toUpperCase() as IngestMethod,
-        }
-    });
-
-
 };

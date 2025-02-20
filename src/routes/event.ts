@@ -14,6 +14,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '..';
 import resWrap from '../utils/responseWrapper';
+import { DestinationWithStreamAndCategory } from '../types/StreamObj';
 
 const eventRouter = Router();
 
@@ -32,7 +33,17 @@ eventRouter.post('/', async (req: Request, res: Response) => {
     const event = await prisma.event.create({
         data: {
             name,
-            description
+            description,
+            branding: {
+                create: {
+
+                }
+            },
+            promos: {
+                create: {
+
+                }
+            }
         }
     });
     res.json({
@@ -88,16 +99,35 @@ eventRouter.get('/', async (req: Request, res: Response) => {
 });
 
 // get all events custom destination
-eventRouter.get('/:id/destination', async (req: Request, res: Response) => {
-    const destinations = await prisma.reservedDestination.findMany({
-        include: {
-            stream: {
+eventRouter.get('/:eventId/destination', async (req: Request, res: Response) => {
+    const { eventId } = req.params;
+
+    const destinations = await prisma.$transaction(async (tx) => {
+        // 1. look up all the destinations given the event id
+        const destinations: DestinationWithStreamAndCategory[] = await tx.reservedDestination.findMany({
+            where: {
+                eventId
+            },
+        });
+
+        // 2. for each destination, look up the stream and its categorys
+        for (const destination of destinations) {
+            if (!destination.streamId) {
+                continue;
+            }
+            const stream = await tx.stream.findUnique({
+                where: {
+                    id: destination.streamId as string | undefined
+                },
                 include: {
                     category: true
                 }
-            }
+            });
+            destination.stream = stream;
         }
+        return destinations;
     });
+
     res.json({
         code:0,
         data: destinations
@@ -148,6 +178,38 @@ eventRouter.put('/:id', async (req: Request, res: Response) => {
     res.json({
         code:0,
         data: event
+    });
+});
+
+// delete/ archive an event
+eventRouter.delete('/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { remove } = req.query;
+
+    if (remove) {
+        const doc = await prisma.event.delete({
+            where: {
+                id
+            }
+        });
+        res.json({
+            code:0,
+            data: doc
+        });
+        return;
+    }
+    
+    const doc = await prisma.event.update({
+        where: {
+            id
+        },
+        data: {
+            archived: true
+        }
+    });
+    res.json({
+        code:0,
+        data: doc
     });
 });
 
@@ -216,6 +278,5 @@ eventRouter.delete('/:eventId/destination/:id', async (req: Request, res: Respon
         data: doc
     });
 });
-
 
 export default eventRouter;

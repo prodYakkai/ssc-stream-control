@@ -5,22 +5,6 @@ import resWrap from '../utils/responseWrapper';
 
 const userRouter = Router();
 
-// get current user profile
-userRouter.get('/profile', async (req: Request, res: Response) => {
-    const userInfo = await prisma.user.findUnique({
-        where: {
-            email: req.user?.email
-        },
-        select: {
-            email: true,
-            thirdPartyId: true,
-        }
-    });
-
-    res.send(resWrap(userInfo));
-});
-
-
 // privilege elevation
 userRouter.post('/elevator', async (req: Request, res: Response) => {
     const { floor, call } = req.body;
@@ -102,7 +86,7 @@ userRouter.delete('/:id', requireAdmin, async (req: Request, res: Response) => {
         return;
     }
     
-    if (user.email === req.user?.email) {
+    if (user.email === req.session.user?.email) {
         res.send(resWrap(null, -1, 'Cannot delete yourself'));
         return;
     }

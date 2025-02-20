@@ -6,9 +6,14 @@
     <h2>Stream: {{ stream.name }}</h2>
     <h3>Category: {{ stream.category.name }}</h3>
     <div>
-      Status:
+      Stream Status:
       <nz-tag *ngIf="stream.srsIngestClientId" nzColor="green">Online</nz-tag>
       <nz-tag *ngIf="!stream.srsIngestClientId" nzColor="red">Offline</nz-tag>
+    </div>
+    <div>
+      View Lock Status:
+      <nz-tag *ngIf="!stream.viewLocked" nzColor="green">Unlocked</nz-tag>
+      <nz-tag *ngIf="stream.viewLocked" nzColor="red">Locked</nz-tag>
     </div>
     <div>
       <label for="description">Stream description</label>
@@ -28,6 +33,16 @@
       >
         Rotate All Key
       </button>
+      <button
+        nz-button
+        nzType="primary"
+        nzSize="small"
+        style="margin: 10px 10px"
+        nzDanger
+        (click)="toggleLockView()"
+      >
+        {{stream.viewLocked ? 'Unl' : 'L'}}ock view
+      </button>
       <div>
         Ingest Key:
         <a
@@ -40,7 +55,7 @@
         <pre>{{ stream.ingestKey }}</pre>
       </div>
       <div>
-        Player Key:
+        <span>Player Key: </span>
         <a nz-button nzType="primary" nzSize="small" (click)="rotateKey('view')"
           >Rotate Key</a
         >
@@ -89,7 +104,6 @@
         *ngFor="let item of destinationPatchNode"
         [nzLabel]="item.title"
         [nzValue]="item.key"
-        [nzDisabled]="item.disabled"
       ></nz-option>
     </nz-select>
     <label nz-checkbox [(ngModel)]="disconnectOnPatch">Reconnect</label>
@@ -114,8 +128,8 @@
       <nz-descriptions-item nzTitle="Frames">{{ srsInfo.frames }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Sent Bytes">{{ srsInfo.send_bytes | fileSize }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Received Bytes">{{ srsInfo.recv_bytes | fileSize }}</nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Kbps (Receive - Last 30s)">{{ srsInfo.kbps.recv_30s * 1000 | fileSize }}ps</nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Kbps (Send - Last 30s)">{{ srsInfo.kbps.send_30s * 1000 | fileSize}}ps</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Kbps (Receive - Last 30s)">{{ srsInfo.kbps.recv_30s * 1000 | fileSize: true }}ps</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Kbps (Send - Last 30s)">{{ srsInfo.kbps.send_30s * 1000 | fileSize: true }}ps</nz-descriptions-item>
   
       <nz-descriptions-item nzTitle="Publishing Details" [nzSpan]="2"></nz-descriptions-item>
       <nz-descriptions-item nzTitle="Publish Active">

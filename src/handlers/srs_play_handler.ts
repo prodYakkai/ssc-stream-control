@@ -16,6 +16,7 @@ import { SrsPublish } from '../types/SrsPublish';
 import sha256 from 'sha256';
 import dayjs from 'dayjs';
 import {  StreamURLFlattenParams } from '../utils/urlConstruct';
+import { prisma } from '..';
 
 export const SrsPlayHandler = async (
   payload: SrsPublish,
@@ -74,6 +75,34 @@ export const SrsPlayHandler = async (
     );
     console.error(`Computed hash: ${computedHash}`);
     console.error(`Expected hash: ${parsedParams.sign}`);
+    reject();
+    SrsService.kickStreamClient(payload.client_id);
+    return;
+  }
+
+  const streamInfo = await prisma.stream.findUnique({
+    where: {
+      viewKey: parsedParams.key,
+    },
+    select: {
+      id: true,
+      viewLocked: true,
+    }
+  });
+
+  if (!streamInfo) {
+    console.error(
+      `Stream not found in SRS play payload ${payload.client_id}`,
+    );
+    reject();
+    // SrsService.kickStreamClient(payload.client_id);
+    return;
+  }
+
+  if (streamInfo.viewLocked) {
+    console.error(
+      `Stream locked, kicking client ${payload.ip}`,
+    );
     reject();
     SrsService.kickStreamClient(payload.client_id);
     return;

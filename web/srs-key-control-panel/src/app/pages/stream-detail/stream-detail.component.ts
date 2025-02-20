@@ -116,7 +116,7 @@ export class StreamDetailComponent implements OnInit {
 
         this.destinationPatchNode = res.data.map((destination) => {
           return {
-            title: destination.name,
+            title: destination.name + (destination.streamId ? destination.streamId === this.id ? ' (Current)' : ' (In Use)' : ''),
             key: destination.id,
             isLeaf: true,
             disabled: destination.streamId !== null 
@@ -205,4 +205,25 @@ export class StreamDetailComponent implements OnInit {
     });
   }
 
+  toggleLockView(){
+    if (!this.stream){
+      console.error('Stream is not loaded');
+      return;
+    }
+
+    this.keyService.lockStream(this.stream.id, !this.stream.viewLocked).subscribe({
+      next: (res) => {
+        if (res.code < 0){
+          console.error(res);
+          return;
+        }
+
+        this.loadStream(this.stream?.id as string);
+        this.messageService.success(`View key ${this.stream?.viewKey ? 'L' : 'Unl'}ocked successfully`);
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
 }
