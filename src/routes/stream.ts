@@ -119,44 +119,12 @@ streamRouter.post(
 // revoke a key within a category
 streamRouter.delete('/id/:streamId', requireAdmin, async (req: Request, res: Response) => {
   const { streamId } = req.params;
-  const { revokePassword, forceKickClient } = req.query;
+  const {forceKickClient } = req.query;
   if (!streamId) {
     res.status(400);
     res.json({
       message: 'streamId is required',
       code: -1,
-    });
-    return;
-  }
-
-  if (!revokePassword) {
-    res.status(400);
-    res.json({
-      message: 'revokePassword is required',
-      code: -1,
-    });
-    logAuditTrail({
-      action: AuditTrailAction.KickStream,
-      // @ts-expect-error already checked at guard
-      actor: req.user?.email,
-      target: `${streamId}`,
-      success: false,
-    });
-    return;
-  }
-
-  if (revokePassword !== process.env.REVOKE_PASSWORD) {
-    res.status(400);
-    res.json({
-      message: 'revokePassword is incorrect',
-      code: -1,
-    });
-    logAuditTrail({
-      action: AuditTrailAction.KickStream,
-      // @ts-expect-error already checked at guard
-      actor: req.user?.email,
-      target: `${streamId}`,
-      success: false,
     });
     return;
   }
@@ -205,6 +173,35 @@ streamRouter.delete('/id/:streamId', requireAdmin, async (req: Request, res: Res
   });
 });
 
+// lockdown a key to prevent further viewing
+streamRouter.post('/id/:streamId/lock', requireAdmin, async (req: Request, res: Response) => {
+  const { streamId } = req.params;
+  const { lockdown } = req.body;
+  if (!streamId) {
+    res.status(400);
+    res.json({
+      message: 'streamId is required',
+      code: -1,
+    });
+    return;
+  }
+
+  const streamData = await prisma.stream.update({
+    where: {
+      id: streamId,
+    },
+    data: {
+      viewLocked: lockdown as boolean,
+    }
+  });
+
+  res.json({
+    message: 'success',
+    code: 0,
+    data: streamData,
+  });
+});
+
 // get a stream key detail by stream id
 streamRouter.get('/id/:streamId', async (req: Request, res: Response) => {
   const { streamId } = req.params;
@@ -217,22 +214,31 @@ streamRouter.get('/id/:streamId', async (req: Request, res: Response) => {
     return;
   }
 
-  const streamData = await prisma.stream.findFirst({
-    where: {
-      id: streamId,
-    },
-    include: {
-      category: true,
-      viewers: true,
-      event: true,
-      destination: true,
-    },
-  });
+  const [streamData, destination] = await prisma.$transaction([
+    prisma.stream.findFirst({
+      where: {
+        id: streamId,
+      },
+      include: {
+        category: true,
+        viewers: true,
+        event: true,
+      },
+    }),
+    prisma.reservedDestination.findFirst({
+      where: {
+        streamId: streamId,
+      },
+    }),
+  ]);
 
   res.json({
     message: 'success',
     code: 0,
-    data: streamData,
+    data: {
+      ...streamData,
+      destination,
+    }
   });
 });
 
@@ -346,14 +352,18 @@ streamRouter.post('/route/:streamId', async (req: Request, res: Response) => {
     return;
   }
 
-  const streamData = await prisma.stream.findFirst({
-    where: {
-      id: streamId,
-    },
-    include: {
-      destination: true,
-    },
-  });
+  const [ streamData, destination ] = await prisma.$transaction([
+    prisma.stream.findFirst({
+      where: {
+        id: streamId,
+      }
+    }),
+    prisma.reservedDestination.findFirst({
+      where: {
+        streamId
+      },
+    }),
+  ]);
 
   if (!streamData) {
     res.status(400);
@@ -366,14 +376,12 @@ streamRouter.post('/route/:streamId', async (req: Request, res: Response) => {
 
   // unpatch destination
   if (targetDestId === null) {
-    const updatedStreamData = await prisma.stream.update({
+    const updatedDestination = await prisma.reservedDestination.update({
       where: {
-        id: streamId,
+        id: destination?.id || undefined,
       },
       data: {
-        destination: {
-          disconnect: true,
-        },
+        streamId: null,
       },
     });
 
@@ -384,12 +392,15 @@ streamRouter.post('/route/:streamId', async (req: Request, res: Response) => {
     res.json({
       message: 'success',
       code: 0,
-      data: updatedStreamData,
+      data: {
+        ...streamData,
+        destination: updatedDestination,
+      },
     });
     return;
   }
 
-  if (streamData.destination?.id === targetDestId) {
+  if (destination?.id === targetDestId) {
     res.status(400);
     res.json({
       message: 'destination already connected',
@@ -413,16 +424,12 @@ streamRouter.post('/route/:streamId', async (req: Request, res: Response) => {
     return;
   }
 
-  const updatedStreamData = await prisma.stream.update({
+  const updatedDestination = await prisma.reservedDestination.update({
     where: {
-      id: streamId,
+      id: destData.id,
     },
     data: {
-      destination: {
-        connect: {
-          id: targetDestId,
-        },
-      },
+      streamId: streamId,
     },
   });
 
@@ -433,7 +440,10 @@ streamRouter.post('/route/:streamId', async (req: Request, res: Response) => {
   res.json({
     message: 'success',
     code: 0,
-    data: updatedStreamData,
+    data: {
+      ...streamData,
+      destination: updatedDestination,
+    }
   });
 });
 

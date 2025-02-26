@@ -96,4 +96,10 @@ export class KeyService {
       targetDestId: destinationId,
     });
   }
+
+  lockStream(streamId: string, lock: boolean) {
+    return this.http.post<HttpResponse<Stream>>(`${environment.apiHost}/stream/id/${streamId}/lock`, {
+      lockdown: lock,
+    });
+  }
 }

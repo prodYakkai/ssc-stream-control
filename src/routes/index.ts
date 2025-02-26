@@ -20,6 +20,7 @@ import categoryRouter from './category';
 import eventRouter from './event';
 import authRouter from './auth';
 import userRouter from './user';
+import eventBrandingRouter from './branding';
 
 const baseRouter = Router();
 
@@ -32,6 +33,7 @@ baseRouter.use('/stream', [requireAuth], streamRouter);
 baseRouter.use('/category', [requireAuth], categoryRouter);
 baseRouter.use('/event', [requireAuth], eventRouter);
 baseRouter.use('/feed', feedRouter);
+baseRouter.use('/branding', eventBrandingRouter);
 baseRouter.use('/batch', [requireAuth], batchRouter);
 baseRouter.use('/user', [requireAuth], userRouter);
 

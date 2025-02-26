@@ -8,8 +8,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { catchError, throwError } from 'rxjs';
-import { LocalStorageKey } from '../constants/StorageKey';
-import { SocialAuthService } from '@abacritt/angularx-social-login';
+import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -17,14 +16,14 @@ export const authInterceptor: HttpInterceptorFn = (
 ) => {
   const messageService = inject(NzMessageService);
   const router = inject(Router);
-  const auth = inject(SocialAuthService);
+  const auth = inject(AuthService);
 
   const handleAuthError = () => {
     router.navigate(['/login']);
     messageService.warning('Unauthorized, please login again');
-    auth.signOut();
-    localStorage.removeItem(LocalStorageKey.LoginToken);
+    auth.authStateChange(false);
   }
+
 
   if (req.headers.has('Authorization')) {
     // already has an Authorization header, might be a login request
@@ -32,9 +31,7 @@ export const authInterceptor: HttpInterceptorFn = (
   }
 
   const newReq = req.clone({
-    setHeaders: {
-      Authorization: `Bearer ${localStorage.getItem(LocalStorageKey.LoginToken)}`,
-    },
+    withCredentials: true,
   });
 
   return next(newReq).pipe(

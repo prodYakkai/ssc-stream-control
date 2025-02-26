@@ -16,6 +16,7 @@
         "appcheck",
         "firestore",
         "immer",
+        "lockdown",
         "prodyakkai",
         "unsnake",
         "whep"

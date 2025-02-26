@@ -1,3 +1,4 @@
+import { environment } from './../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import {
@@ -49,6 +50,7 @@ export class DestinationManageComponent implements OnInit {
   destinations: DestinationWithStream[] = [];
   public isLoading = false;
   currentEventId: string = '';
+  public environment = environment;
 
   constructor(
     private fb: FormBuilder,

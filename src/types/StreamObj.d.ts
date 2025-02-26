@@ -11,3 +11,14 @@
  * 
  */
 
+import { Category, ReservedDestination, Stream } from '@prisma/client';
+
+interface DestinationWithStream extends ReservedDestination {
+    stream?: Stream | null;
+}
+
+interface DestinationWithStreamAndCategory extends DestinationWithStream {
+    stream?: Stream & {
+        category: Category;
+    } | null;
+}

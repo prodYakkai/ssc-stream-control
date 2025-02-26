@@ -15,6 +15,7 @@ import { Router, Request, Response } from 'express';
 import { getUrlSignHash } from '../utils/urlConstruct';
 import { prisma } from '..';
 import { REDACTED } from '../constants';
+import resWrap from '../utils/responseWrapper';
 
 const feedRouter = Router();
 
@@ -32,29 +33,51 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
     return;
   }
 
-  const streamData = await prisma.stream.findFirst({
-    where: {
-      viewKey: viewKey.toString(),
-    },
-    include: {
-      destination: true,
-      category: {
-        select: {
-          name: true,
-          id: true,
-        }
+  const streamData = await prisma.$transaction(async (tx) => {
+    // 1. probe the viewKey on destination
+    const destinationProbe = await tx.reservedDestination.findFirst({
+      where: {
+        id: viewKey.toString(),
       },
-      event: {
-        select: {
-          name: true,
-          id: true,
-        }
+      select: {
+        streamId: true
+      }
+    }).catch(() => null);
+    // if the viewKey is not found, return null
+
+    // 2. fetch stream data
+    const streamData = await tx.stream.findFirst({
+      where: {
+        OR: [
+          {
+            viewKey: viewKey.toString(),
+          },
+          {
+            id: destinationProbe?.streamId || undefined,
+          },
+        ]
       },
+      include: {
+        category: true,
+        event: true,
+      }
+    });
+
+    if (!streamData) {
+      return null;
+    }
+
+    return {
+      ...streamData,
+      destination: destinationProbe ? {
+        streamId: destinationProbe.streamId,
+        viewKey: viewKey.toString(),
+      } : null,
     }
   });
 
   if (streamData === null) {
-    res.status(500).json({ message: 'Internal server error?', code: -1 });
+    res.status(500).json({ message: 'Internal server error question mark?', code: -1 });
     return;
   }
 
@@ -63,10 +86,6 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
   if (previewHourTime <= 0 ){
     res.status(400).json({ message: 'Invalid preview key valid time, must greater than 0 hours.', code: -1 });
     return;
-  }
-
-  if (streamData.destination) {
-    /// TODO: ?? maybe redirect them to the destination url?
   }
 
   // sanitize the stream data
@@ -80,12 +99,42 @@ feedRouter.get('/:viewKey', async (req: Request, res: Response) => {
     message: 'success',
     code: 0,
     data: {
+      resolveNext: streamData.destination !== null,
       expire: playbackSignResult.expire,
       sign: playbackSignResult.sign,
       start: playbackSignResult.start,
       ...streamData,
     }
   });
+});
+
+feedRouter.get('/event/:eventId', async (req: Request, res: Response) => {
+  const { eventId } = req.params;
+
+  if (!eventId) {
+    res.status(400).json({ message: 'Missing event id', code: -1 });
+    return;
+  }
+
+  // get all event branding
+  const eventBranding = await prisma.eventBranding.findMany({
+    where: {
+      eventId,
+    }
+  });
+
+  // get all eventAds
+  const eventAds = await prisma.eventAd.findMany({
+    where: {
+      eventId,
+    }
+  });
+
+  res.json(resWrap({
+    eventBranding,
+    eventPromo: eventAds,
+  }));
+  
 });
 
 export default feedRouter;

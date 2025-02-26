@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -11,11 +11,34 @@ export class AuthService {
     private http: HttpClient
   ) { }
 
-  probe(token?: string) {
+  authStateChanged: EventEmitter<boolean> = new EventEmitter();
+  authState: boolean = false;
+
+  probe() {
     return this.http.get(`${environment.apiHost}/auth/probe`, {
+      withCredentials: true,
       headers: {
-        Authorization: `Bearer ${token}`
+        'Authorization': 'Bearer probe',
       }
     });
+  }
+
+  callback(oauthObj: unknown) {
+    return this.http.get(`${environment.apiHost}/auth/callback`, {
+      params: oauthObj as unknown as { [key: string]: string },
+      withCredentials: true,
+      headers: {
+        'Authorization': 'Bearer callback'
+      }
+    });
+  }
+  
+  signout() {
+    return window.location.replace(`${environment.apiHost}/auth/logout?redirect=${window.location.origin}`);
+  }
+
+  authStateChange(state: boolean) {
+    this.authState = state;
+    this.authStateChanged.emit(state);
   }
 }

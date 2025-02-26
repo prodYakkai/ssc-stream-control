@@ -13,15 +13,13 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule, RouterOutlet } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { Subscription } from 'rxjs';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { LocalStorageKey } from './constants/StorageKey';
-import { GoogleLoginProvider, SocialAuthService, SocialLoginModule, SocialUser } from '@abacritt/angularx-social-login';
-import { jwtDecode } from 'jwt-decode';
 import { EventSelectorComponent } from './components/event-selector/event-selector.component';
 import { BrandingInfo } from './../../../../common/branding/branding';
 import { Branding } from './../../../../common/branding/branding.abs';
@@ -38,7 +36,6 @@ import { AuthService } from './services/auth.service';
     NzMenuModule,
     RouterModule,
     NzDividerModule,
-    SocialLoginModule,
     EventSelectorComponent
   ],
   templateUrl: './app.component.html',
@@ -51,61 +48,19 @@ export class AppComponent implements OnInit, OnDestroy {
   authStateSubscription: Subscription = new Subscription();
   branding: Branding = new BrandingInfo();
 
-  constructor(private auth: SocialAuthService, private router: Router, private apiAuth: AuthService) { }
+  constructor(private router: Router, private apiAuth: AuthService, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.authStateSubscription = this.auth.authState.subscribe(
-      this.authStateChanged
-    );
+    this.authStateSubscription = this.apiAuth.authStateChanged.subscribe(this.authStateChanged);
     this.initializeLocalStorage();
     this.checkTokenValidity();
   }
 
-  ngOnDestroy(): void {
-    this.authStateSubscription.unsubscribe();
-  }
-
-  checkTokenValidity = async () => {
-    const storedToken = localStorage.getItem(LocalStorageKey.LoginToken);
-
-    if (!storedToken) {
-      this.isLoggedIn = false;
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    const decodedToken = jwtDecode(storedToken);
-    // check for expiration
-    if (Date.now() >= (decodedToken.exp || 0) * 1000) {
-      this.auth.refreshAuthToken(GoogleLoginProvider.PROVIDER_ID).then(() => {
-        console.log('Refreshed token');
-      }).catch((err) => {
-        console.error('Failed to refresh token', err);
-        this.isLoggedIn = false;
-        this.router.navigate(['/login']);
-      });
-      return;
-    }
-    this.isLoggedIn = true;
-
-    if (this.router.url === '/login') {
-      this.router.navigate(['/']);
-    }
-  }
-
-  authStateChanged = (user: SocialUser | null) => {
-    console.log('Auth state changed', user);
-    if (!user) {
-      this.isLoggedIn = false;
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    this.apiAuth.probe(user.idToken)
+  checkTokenValidity = () => {
+    this.apiAuth.probe()
       .subscribe({
-        next: (res: any) => {
+        next: (res: unknown) => {
           console.log('Probe response', res);
-          localStorage.setItem(LocalStorageKey.LoginToken, user.idToken);
 
           this.isLoggedIn = true;
 
@@ -113,17 +68,29 @@ export class AppComponent implements OnInit, OnDestroy {
             this.router.navigate(['/']);
           }
         },
-        error: (err: any) => {
+        error: (err: unknown) => {
           console.error('Probe error', err);
         }
-      })
+      });
+  };
+
+  ngOnDestroy(): void {
+    this.authStateSubscription.unsubscribe();
+  }
+
+  authStateChanged = (user: boolean) => {
+    console.log('Auth state changed', user);
+    if (!user) {
+      this.isLoggedIn = false;
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.checkTokenValidity();
   };
 
   logout = () => {
-    this.auth.signOut();
-    this.router.navigate(['login']);
-    this.isLoggedIn = false;
-    localStorage.removeItem(LocalStorageKey.LoginToken);
+    this.apiAuth.signout();
   };
 
   initializeLocalStorage = () => {

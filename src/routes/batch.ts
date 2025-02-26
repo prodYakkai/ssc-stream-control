@@ -27,7 +27,7 @@ const batchRouter = Router();
 
 let genLock = false;
 
-batchRouter.post('/generate', async(req: Request,res: Response)=>{
+batchRouter.post('/master_report', async(req: Request,res: Response)=>{
     const { 
         previewSignValidHours,
         eventId
@@ -348,6 +348,12 @@ batchRouter.post('/generate', async(req: Request,res: Response)=>{
         return;
     }
 
-})
+});
+
+batchRouter.post('/create', async(req: Request,res: Response)=>{
+    // TODO: Implement batch creation of streams
+    void req;
+    void res;
+});
 
 export default batchRouter;

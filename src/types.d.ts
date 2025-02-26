@@ -10,12 +10,11 @@
  * 
  */
 
-import { TokenPayload } from 'google-auth-library';
+import { oauth2_v2 } from 'googleapis';
 
-export interface ExtendedTokenPayload extends TokenPayload {
+interface ExtendedUserInfo extends oauth2_v2.Schema$Userinfo {
   isAdmin: boolean;
 }
-
 
 declare module 'http' {
   interface IncomingMessage {
@@ -25,9 +24,15 @@ declare module 'http' {
 
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: ExtendedTokenPayload;
     // query where only string values are present (the rest are removed)
     stringQuery: { [key: string]: string };
     booleanQuery: { [key: string]: boolean };
   }
+}
+
+declare module 'express-session' {
+    interface SessionData {
+        state: string;
+        user: ExtendedUserInfo;
+    }
 }

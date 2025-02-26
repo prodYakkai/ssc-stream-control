@@ -11,6 +11,7 @@
  * 
  */
 
+import { IngestMethod } from '@prisma/client';
 import { prisma } from '..';
 import { SrsPublish } from '../types/SrsPublish';
 
@@ -25,6 +26,10 @@ export const SrsUnpublishHandler = async (payload: SrsPublish) => {
     const streamDoc = await prisma.stream.findFirst({
         where: {
             ingestKey: parsedParams.key
+        },
+        select: {
+            id: true,
+            srsIngestClientId: true,
         }
     });
 
@@ -34,20 +39,46 @@ export const SrsUnpublishHandler = async (payload: SrsPublish) => {
     }
 
     if (streamDoc.srsIngestClientId !== payload.client_id) {
-        console.warn(`Client ${payload.client_id} is not assigned to stream ${payload.stream}, skipped.`);
+        console.warn(`Client ${payload.client_id} is not assigned to stream ${payload.stream}.`);
         // return;
     }
 
     console.log(`Un-assigning stream ${payload.client_id} from stream ${payload.stream}`);
-    await prisma.stream.update({
-        where: {
-            id: streamDoc.id
-        },
-        data: {
-            srsIngestClientId: null,
-            srsIngestStreamId: null,
-            ingestMethod: undefined,
-        }
-    });
 
+    await prisma.$transaction(async (tx) => {
+        // 1. update stream
+        await tx.stream.update({
+            where: {
+                id: streamDoc.id
+            },
+            data: {
+                srsIngestClientId: null,
+                srsIngestStreamId: null,
+                ingestMethod: IngestMethod.UNKNOWN,
+            }
+        });
+        // 2. probe for stream history
+        const streamHistory = await tx.streamHistory.findFirst({
+            where: {
+                srsClientId: payload.client_id,
+                streamId: streamDoc.id,
+                stoppedAt: undefined,
+            }
+        });
+        // if not found, then skip
+        if (!streamHistory) {
+            console.warn(`No stream history found for client ${payload.client_id} and stream ${payload.stream}.`);
+            return;
+        }
+        // 3. update stream history
+        await tx.streamHistory.update({
+            where: {
+                id: streamHistory.id,
+            },
+            data: {
+                stoppedAt: new Date(),
+            }
+        });
+        return;
+    });
 };

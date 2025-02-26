@@ -23,9 +23,15 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 type unit = 'bytes' | 'KB' | 'MB' | 'GB' | 'TB' | 'PB';
+type unit8 = 'bits' | 'Kb' | 'Mb' | 'Gb' | 'Tb' | 'Pb';
 type unitPrecisionMap = {
   [u in unit]: number;
 };
+
+type unitPrecisionMap8 = {
+  [u in unit8]: number;
+};
+
 
 const defaultPrecisionMap: unitPrecisionMap = {
   bytes: 0,
@@ -34,6 +40,15 @@ const defaultPrecisionMap: unitPrecisionMap = {
   GB: 1,
   TB: 2,
   PB: 2
+};
+
+const defaultPrecisionMap8: unitPrecisionMap8 = {
+  bits: 0,
+  Kb: 0,
+  Mb: 1,
+  Gb: 1,
+  Tb: 2,
+  Pb: 2
 };
 
 /*
@@ -54,22 +69,32 @@ const defaultPrecisionMap: unitPrecisionMap = {
 @Pipe({ name: 'fileSize', standalone: true })
 export class FileSizePipe implements PipeTransform {
   private readonly units: unit[] = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  private readonly units8: unit8[] = ['bits', 'Kb', 'Mb', 'Gb', 'Tb', 'Pb'];
 
-  transform(bytes: number = 0, precision: number | unitPrecisionMap = defaultPrecisionMap): string {
-    if (isNaN(parseFloat(String(bytes))) || !isFinite(bytes)) return '?';
+
+  transform(size: number = 0, bit: boolean = false, precision?: number): string {
+    if (isNaN(parseFloat(String(size))) || !isFinite(size)) return '?';
 
     let unitIndex = 0;
 
-    while (bytes >= 1024) {
-      bytes /= 1024;
+    while (size >= 1024) {
+      size /= 1024;
       unitIndex++;
     }
 
-    const unit = this.units[unitIndex];
-
-    if (typeof precision === 'number') {
-      return `${bytes.toFixed(+precision)} ${unit}`;
+    if (bit) {
+      const unit8 = this.units8[unitIndex];
+      if (typeof precision === 'number') {
+        return `${size.toFixed(+precision)} ${unit8}`;
+      }
+      return `${size.toFixed(defaultPrecisionMap8[unit8])} ${unit8}`;
     }
-    return `${bytes.toFixed(precision[unit])} ${unit}`;
+
+    const unit = this.units[unitIndex];
+    if (typeof precision === 'number') {
+      return `${size.toFixed(+precision)} ${unit}`;
+    }
+    return `${size.toFixed(defaultPrecisionMap[unit])} ${unit}`;
+
   }
 }
