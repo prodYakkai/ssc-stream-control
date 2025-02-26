@@ -14,7 +14,12 @@ services:
       timeout: 30s
       retries: 5
       start_period: 20s
-    # develop:
-    #   watch:
-    #     - action: rebuild
-    #       path: ./src
+    develop:
+      watch:
+        - action: rebuild
+          path: ./src
+  redis:
+    image: redis:7.4.2-alpine
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning
+

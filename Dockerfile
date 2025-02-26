@@ -1,4 +1,4 @@
-FROM node:18.19.0-alpine as builder
+FROM node:20.13.0-alpine as builder
 
 # Create app directory
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN yarn generate:prisma
 
 RUN yarn build
 
-FROM node:18.19.0-alpine
+FROM node:20.13.0-alpine
 
 ENV NODE_ENV production
 USER node
