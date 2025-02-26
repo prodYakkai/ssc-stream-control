@@ -129,7 +129,17 @@ app.listen(process.env.PORT || 3005, async () => {
 ⭐️ Happy coding!`);
 });
 
+redis.on('error', (err) => {
+  console.error('Redis error', err);
+  process.exit(1);
+});
+
+redis.on('connect', () => {
+  console.log('Redis connected');
+});
+
 process.on('exit', async () => {
   console.log('Cleaning up...');
   await prisma.$disconnect();
+  await redis.disconnect();
 });
