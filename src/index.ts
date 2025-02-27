@@ -73,7 +73,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors({
   credentials: true,
-  origin: true
+  origin: [
+    'http://localhost:3005',
+    'https://control.blackcompany.tv',
+  ]
 }));
 app.use(session(sessionSetting));
 app.use(
