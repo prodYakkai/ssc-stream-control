@@ -76,6 +76,7 @@ app.use(cors({
   origin: [
     'http://localhost:3005',
     'https://control.blackcompany.tv',
+    'https://play.blackcompany.tv',
   ]
 }));
 app.use(session(sessionSetting));
