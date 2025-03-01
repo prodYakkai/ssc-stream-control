@@ -26,7 +26,7 @@ model Event {
   branding   EventBranding?
   brandingId String?        @db.ObjectId
 
-  promos   EventAd[]
+  promos EventAd[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,8 +36,8 @@ model Event {
 }
 
 model EventBranding {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  eventId String  @unique @db.ObjectId
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  eventId    String  @unique @db.ObjectId
   logoUrl    String?
   faviconUrl String?
 
@@ -55,10 +55,9 @@ model EventBranding {
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
-
 model EventAd {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  eventId String  @db.ObjectId
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  eventId String @db.ObjectId
 
   imageURL String?
 
@@ -66,7 +65,7 @@ model EventAd {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  disabled Boolean @default(false)
+  disabled  Boolean  @default(false)
 
   // Relations
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -99,26 +98,25 @@ model Stream {
   viewers  Viewer[]
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  
+
   streamHistory StreamHistory[]
 }
 
 model ReservedDestination {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  streamId String? @db.ObjectId 
+  streamId String? @db.ObjectId
 
   eventId String @db.ObjectId
   event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
-  viewKey     String  @unique @default(uuid())
+  viewKey String @unique @default(uuid())
 
   name        String  @unique
   description String?
   redirect    Boolean @default(false)
 
   createdAt DateTime @default(now())
-
 }
 
 model Category {
@@ -143,14 +141,14 @@ model Viewer {
 }
 
 model User {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
-  email        String @unique
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  email        String  @unique
   thirdPartyId String?
   name         String
 
   admin    Boolean @default(false)
   disabled Boolean @default(false)
-  groups Boolean @default(false)
+  groups   Boolean @default(false)
 
   eventIds String[] @db.ObjectId
   events   Event[]  @relation(fields: [eventIds], references: [id])
