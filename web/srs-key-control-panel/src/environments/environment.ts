@@ -5,5 +5,4 @@ export const environment = {
     host: 'stream.offkai.tech',
     src: 'stream.offkai.tech',
   },
-  googleClientId: '81474986988-1v511emglohnspu6vu39d17mr4v2tfr4.apps.googleusercontent.com',
 };

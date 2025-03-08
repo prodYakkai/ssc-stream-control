@@ -33,33 +33,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void { }
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      if (Object.keys(params).length === 0) {
-        return;
-      }
-      console.log(params);
-      this.isLoading = true;
-      this.router.navigate([], {
-        queryParams: {},
-        queryParamsHandling: 'merge',
-      })
-
-      if (
-        params['type'] === 'openid'
-      ) {
-        this.authService.callbackOpenid(params['url']).subscribe({
-          next: this.handleLoginSuccess,
-          error: this.handleLoginFail
-        });
-      } else {
-        this.authService.callbackGoogle(params).subscribe({
-          next: this.handleLoginSuccess,
-          error: this.handleLoginFail,
-        });
-      }
-    });
-  }
+  ngOnInit(): void { }
 
   handleLoginSuccess = ()=> {
     this.isLoading = false;
