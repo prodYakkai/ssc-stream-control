@@ -53,7 +53,7 @@ jobs:
         uses: azure/CLI@v2
         with:
           inlineScript: |
-              az storage blob upload-batch --account-name ${{ vars.BLOB_ACCOUNT_NAME }} -d '$web' -s $GITHUB_WORKSPACE/dist/srs-key-control-panel/ --debug --overwrite
+              az storage blob upload-batch --account-name ${{ vars.BLOB_ACCOUNT_NAME }} -d '$web' -s $GITHUB_WORKSPACE/web/srs-key-control-panel/dist/srs-key-control-panel/ --debug --overwrite
 
       - name: Purge CDN endpoint
         uses: azure/CLI@v2
