@@ -45,12 +45,15 @@ jobs:
 
       - name: Copy files
         run: mv ./dist/srs-key-control-panel/browser/* ./dist/srs-key-control-panel/
+      
+      - name: Delete old files
+        run: az storage blob delete-batch --account-name ${{ vars.BLOB_ACCOUNT_NAME }} -s '$web' --pattern '*' --debug
 
       - name: Upload to blob storage
         uses: azure/CLI@v2
         with:
           inlineScript: |
-              az storage blob upload-batch --account-name ${{ vars.BLOB_ACCOUNT_NAME }} -d '$web' -s ./dist/srs-key-control-panel/
+              az storage blob upload-batch --account-name ${{ vars.BLOB_ACCOUNT_NAME }} -d '$web' -s $GITHUB_WORKSPACE/dist/srs-key-control-panel/ --debug --overwrite
 
       - name: Purge CDN endpoint
         uses: azure/CLI@v2
