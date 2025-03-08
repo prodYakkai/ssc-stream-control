@@ -13,6 +13,7 @@
 
 import {default as a} from 'axios';
 import { config as initEnv } from 'dotenv';
+import { SrsApiResponse, SrsClientsResponse } from '../types/SrsClient';
 
 // TODO: beautify this entire thing
 
@@ -68,10 +69,27 @@ const kickPlaybackClient = async (clientId: string) => {
     return res.data;
 }
 
+const getStreams = async () => {
+    const res = await axios.get('/streams')
+    return res.data;
+}
+
+const fetchAllClients = async (page=0, size=20)=> {
+    const res = await axios.get<SrsApiResponse<SrsClientsResponse> >('/clients', {
+        params: {
+            page,
+            size
+        }
+    })
+    return res.data;
+}
+
 
 export const SrsService = {
     kickStreamClient,
     fetchAllVhosts,
     kickPlaybackClient,
-    fetchAllPlaybackClients
+    fetchAllPlaybackClients,
+    getStreams,
+    fetchAllClients
 };

@@ -86,4 +86,10 @@ export class EventService {
   deleteDestination(eventId: string, id: string) {
     return this.http.delete(environment.apiHost + '/event/' + eventId + '/destination/' + id);
   }
+
+  deleteEvent(id: string, remove=false) {
+    return this.http.delete(environment.apiHost + '/event/' + id, {
+      params: { remove: remove.toString() },
+    });
+  }
 }

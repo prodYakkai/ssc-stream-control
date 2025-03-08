@@ -58,7 +58,7 @@
               "fileReplacements": [
                 {
                   "replace": "../../common/branding/branding.ts",
-                  "with": "../../common/branding/branding.yakkai.ts"
+                  "with": "../../common/branding/branding.offkai.ts"
                 }
               ]
             },

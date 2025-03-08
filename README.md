@@ -4,7 +4,9 @@
 
 Use yarn package manager to install dependencies.
 
-Use Firebase for authentication and Firestore for database. Check [here](./docs/firebase.md) for setup.
+## APIs to enable on GCP
+
+- Admin SDK API
 
 ## Notes
 

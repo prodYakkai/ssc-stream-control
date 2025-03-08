@@ -12,7 +12,7 @@
  */
 
 import { PlayerHost } from '../constants';
-import sha256 from 'sha256';
+import { createHash } from 'crypto';
 import dayjs from 'dayjs';
 import { Stream } from '@prisma/client';
 
@@ -81,9 +81,9 @@ export const generateStreamUrl = (mode: 'srt' | 'rtmp' | 'whip' | 'web', params:
 export const getUrlSignHash = (streamData: Stream, expire_in_hour: number,  start: dayjs.Dayjs = dayjs()) : StreamPlayParams => {
     const startEpoch = dayjs(start).unix();
     const expiryEpoch = dayjs(start).add(expire_in_hour, 'hour').unix();
-    const hash = sha256(
+    const hash = createHash('sha256').update(
       `${process.env.FEED_HMAC_KEY}.${startEpoch}.${expiryEpoch}.${streamData.viewKey}`,
-    );
+    ).digest('hex');
     return {
         sign: hash,
         start: startEpoch,

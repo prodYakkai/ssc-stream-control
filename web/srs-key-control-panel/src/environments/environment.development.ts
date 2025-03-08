@@ -5,5 +5,6 @@ export const environment = {
     host: 'localhost',
     src: 'localhost',
   },
-  googleClientId: '365941463067-uriifplv9h8jobq6e2dv7v07ello9g7h.apps.googleusercontent.com',
+  googleClientId: '619209767813-23327176aivirt6gmqv61ig1mg3au3ji.apps.googleusercontent.com',
+  openidClientId: 'gCzGWR9YW0OERt5MnILckWIJ6leZKq6Abcxh41Ho',
 };

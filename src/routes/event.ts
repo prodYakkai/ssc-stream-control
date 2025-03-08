@@ -140,7 +140,7 @@ eventRouter.get('/:eventId', ensureEventId, async (req: Request, res: Response) 
     const { eventId } = req.params;
     const event = await prisma.event.findUnique({
         where: {
-            id: eventId
+            id: eventId as string
         }
     });
     res.json({
@@ -186,7 +186,13 @@ eventRouter.delete('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { remove } = req.query;
 
-    if (remove) {
+    const eventCount = await prisma.event.count({ });
+    if (eventCount <= 1) {
+        res.status(400).json(resWrap({}, 1, 'You must have at least one event'));
+        return;
+    }
+
+    if (remove === 'true') { //TODO: cast to boolean
         const doc = await prisma.event.delete({
             where: {
                 id

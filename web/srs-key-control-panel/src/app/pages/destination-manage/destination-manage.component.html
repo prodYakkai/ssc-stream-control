@@ -64,7 +64,7 @@
 
     <nz-form-item>
       <nz-form-control>
-        <button nz-button nzType="primary" [disabled]="!destinationForm.valid">
+        <button nz-button nzType="primary" [disabled]="!destinationForm.valid || !currentEventId">
           Create Destination
         </button>
       </nz-form-control>

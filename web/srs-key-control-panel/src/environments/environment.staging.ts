@@ -1,9 +1,9 @@
 export const environment = {
-  apiHost: 'https://ssc-staging.blackcompany.tv',
-  playerHost: 'https://play-staging.blackcompany.tv',
+  apiHost: 'https://ssc-staging.offkai.tech',
+  playerHost: 'https://play-staging.offkai.tech',
   streaming: {
-    host: 'stream-staging.blackcompany.tv',
-    src: 'ingest-src-staging.blackcompany.tv',
+    host: 'stream-staging.offkai.tech',
+    src: 'ingest-src-staging.offkai.tech',
   },
-  googleClientId: '365941463067-uriifplv9h8jobq6e2dv7v07ello9g7h.apps.googleusercontent.com',
+  googleClientId: '619209767813-23327176aivirt6gmqv61ig1mg3au3ji.apps.googleusercontent.com',
 };

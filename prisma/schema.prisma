@@ -177,6 +177,15 @@ model AuditTrail {
   createdAt DateTime         @default(now())
 }
 
+// Session package
+model Session {
+  objId        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @unique
+  sid       String   @unique
+  data      String
+  expiresAt   DateTime
+}
+
 enum IngestMethod {
   RTMP
   WHIP

@@ -48,7 +48,11 @@ async function main() {
     where: { id: '674aaaaa0d1e567bf931bae1'},
     update: {},
     create: {
-      eventId: '674aaaaa0d1e567bf931bae0',
+      event: {
+        connect: {
+          id: defaultEvent.id,
+        }
+      },
       
       primaryColor: '#000000',
       secondaryColor: '#ffffff',
@@ -62,7 +66,11 @@ async function main() {
     where: { id: '674aaaaa0d1e567bf931bae2'},
     update: {},
     create: {
-      eventId: '674aaaaa0d1e567bf931bae0',
+      event: {
+        connect: {
+          id: defaultEvent.id,
+        }
+      },
       name: 'default_category',
     }
   });

@@ -65,11 +65,19 @@ export class CategoryManageComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentEventId = this.eventService.getLocalCurrentEvent();
+    if (!this.currentEventId) {
+      this.messageService.error('Please select an event first');
+      return;
+    }
     this.loadCategories();
   }
 
   // Function to handle form submission
   submitForm(): void {
+    if (!this.currentEventId) {
+      this.messageService.error('Please select an event first');
+      return;
+    }
     if (this.categoryForm.valid) {
       this.categoryService
         .createCategory(this.currentEventId, this.categoryForm.value.name)

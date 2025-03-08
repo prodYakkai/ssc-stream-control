@@ -1,9 +1,9 @@
 export const environment = {
-  apiHost: 'https://scc.blackcompany.tv',
-  playerHost: 'https://play.blackcompany.tv',
+  apiHost: 'https://scc.offkai.tech',
+  playerHost: 'https://play.offkai.tech',
   streaming: {
-    host: 'stream.blackcompany.tv',
-    src: 'stream.blackcompany.tv',
+    host: 'stream.offkai.tech',
+    src: 'stream.offkai.tech',
   },
-  googleClientId: '365941463067-uriifplv9h8jobq6e2dv7v07ello9g7h.apps.googleusercontent.com',
+  googleClientId: '81474986988-1v511emglohnspu6vu39d17mr4v2tfr4.apps.googleusercontent.com',
 };

@@ -10,9 +10,10 @@
  * 
  */
 
-import { oauth2_v2 } from 'googleapis';
-
-interface ExtendedUserInfo extends oauth2_v2.Schema$Userinfo {
+interface UserInfo {
+  id: string;
+  name: string;
+  email: string;
   isAdmin: boolean;
 }
 
@@ -22,17 +23,37 @@ declare module 'http' {
   }
 }
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    // query where only string values are present (the rest are removed)
-    stringQuery: { [key: string]: string };
-    booleanQuery: { [key: string]: boolean };
+// declare module 'express-serve-static-core' {
+//   interface Request {
+//     // query where only string values are present (the rest are removed)
+//     stringQuery: { [key: string]: string };
+//     booleanQuery: { [key: string]: boolean };
+//   }
+// }
+
+declare global {
+  namespace Express {
+    interface User extends UserInfo {
+    }
+    interface Request {
+      user?: UserInfo;
+    }
   }
 }
 
-declare module 'express-session' {
-    interface SessionData {
-        state: string;
-        user: ExtendedUserInfo;
-    }
+export interface OpenIDProfile {
+  iss: string
+  sub: string
+  aud: string
+  exp: number
+  iat: number
+  auth_time: number
+  acr: string
+  email: string
+  email_verified: boolean
+  name: string
+  given_name: string
+  preferred_username: string
+  nickname: string
+  groups: string[]
 }

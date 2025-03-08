@@ -75,11 +75,19 @@ export class DestinationManageComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentEventId = this.eventService.getLocalCurrentEvent();
+    if (!this.currentEventId) {
+      this.messageService.error('No event selected');
+      return;
+    }
     this.loadDestinations();
   }
 
   // Function to handle form submission
   submitForm(): void {
+    if (!this.currentEventId) {
+      this.messageService.error('No event selected');
+      return;
+    }
     if (this.destinationForm.valid) {
       this.eventService
         .createDestination(
