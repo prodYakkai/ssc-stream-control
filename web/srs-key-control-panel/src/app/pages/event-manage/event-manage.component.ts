@@ -87,6 +87,7 @@ export class EventManageComponent implements OnInit {
   }
 
   loadEvents(): void {
+    //FIXME: disable select any event that's in archive state
     this.isLoading = true;
     this.eventService.getEvents().subscribe({
       next: (data) => {
@@ -106,5 +107,24 @@ export class EventManageComponent implements OnInit {
   setCurrentEvent(eventId: string): void {
     this.eventService.setLocalCurrentEvent(eventId);
     this.currentEventId = eventId;
+  }
+
+  deleteEvent(eventId: string): void {
+    // FIXME: this should be a confirmation dialog, also need a logic for unarchiving the event
+    this.eventService.deleteEvent(eventId).subscribe({
+      next: () => {
+        this.messageService.success('Event deleted successfully');
+        this.loadEvents();
+        // TODO: if the current event is archived/ deteted, reset the current event to the first one
+        if (this.currentEventId === eventId) {
+          this.currentEventId = '';
+          this.eventService.setLocalCurrentEvent('');
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.messageService.error('Failed to delete event');
+      }
+    });
   }
 }

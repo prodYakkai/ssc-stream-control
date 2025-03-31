@@ -86,7 +86,7 @@ userRouter.delete('/:id', requireAdmin, async (req: Request, res: Response) => {
         return;
     }
     
-    if (user.email === req.session.user?.email) {
+    if (user.email === req.user?.email) {
         res.send(resWrap(null, -1, 'Cannot delete yourself'));
         return;
     }

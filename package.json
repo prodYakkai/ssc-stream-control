@@ -8,12 +8,11 @@
     "build": "yarn clean && yarn lint && tsc",
     "clean": "node -e \"var { rmdirSync, existsSync } = require('fs'), path = require('path'); ['./.nyc_output', './coverage', './dist'].forEach(fPath => {if (existsSync(path.join(__dirname, fPath))) rmdirSync(path.join(__dirname, fPath), { recursive: true })}); process.exit(0);\"",
     "lint": "eslint --ext .ts --fix src/**/*.ts",
-    "dev": "nodemon ./src/index.ts --config nodemon.json",
-    "dev:frontend": "browser-sync start --config bs-config.js"
+    "dev": "nodemon ./src/index.ts --config nodemon.json"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prodyakkai/ssc-stream-control.git"
+    "url": "git+https://github.com/offkai/ssc-stream-control.git"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -27,9 +26,9 @@
   ],
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/prodyakkai/ssc-stream-control/issues"
+    "url": "https://github.com/offkai/ssc-stream-control/issues"
   },
-  "homepage": "https://github.com/prodyakkai/ssc-stream-control#readme",
+  "homepage": "https://github.com/offkai/ssc-stream-control#readme",
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
@@ -39,22 +38,21 @@
     "@types/express-session": "^1.18.1",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.10.4",
-    "@types/sha256": "^0.2.2",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.16",
     "@types/url-params-parser": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
-    "browser-sync": "^2.29.3",
     "eslint": "^8.55.0",
     "nodemon": "^3.0.2",
     "prisma": "^5.17.0",
-    "source-map-support": "^0.5.21",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "@prisma/client": "^5.17.0",
+    "@quixo3/prisma-session-store": "^3.1.13",
     "axios": "^1.6.2",
     "bson": "^6.10.1",
-    "connect-redis": "^8.0.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dayjs": "^1.11.10",
@@ -62,12 +60,12 @@
     "express": "^4.18.2",
     "express-http-proxy": "^2.0.0",
     "express-session": "^1.18.1",
-    "google-auth-library": "^9.6.3",
     "google-spreadsheet": "^4.1.1",
     "googleapis": "^144.0.0",
-    "ioredis": "^5.4.2",
     "morgan": "^1.10.0",
-    "sha256": "^0.2.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-oauth2": "^1.8.0",
     "ts-node": "^10.9.1"
   }
 }

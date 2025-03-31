@@ -21,6 +21,7 @@ import eventRouter from './event';
 import authRouter from './auth';
 import userRouter from './user';
 import eventBrandingRouter from './branding';
+import statRouter from './stat';
 
 const baseRouter = Router();
 
@@ -30,6 +31,7 @@ baseRouter.get('/ping', (_, res) => {
 baseRouter.use('/auth', authRouter);
 baseRouter.use('/hook', webhookRouter);
 baseRouter.use('/stream', [requireAuth], streamRouter);
+baseRouter.use('/stat', [requireAuth], statRouter);
 baseRouter.use('/category', [requireAuth], categoryRouter);
 baseRouter.use('/event', [requireAuth], eventRouter);
 baseRouter.use('/feed', feedRouter);

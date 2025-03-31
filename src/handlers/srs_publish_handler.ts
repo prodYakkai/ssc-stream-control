@@ -68,7 +68,7 @@ export const SrsPublishHandler = async (payload: SrsPublish, resolve: (T: number
             },
             data: {
                 srsIngestClientId: payload.client_id,
-                srsIngestStreamId: payload.stream,
+                srsIngestStreamId: payload.stream_id,
                 ingestMethod: protocol.toUpperCase() as IngestMethod,
             }
         });

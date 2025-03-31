@@ -6,7 +6,7 @@ const eventBrandingRouter = Router();
 
 eventBrandingRouter.get('/:eventId', async (req: Request, res: Response) => {
     const { eventId } = req.params;
-    const [event, ads ] = await prisma.$transaction([
+    const [branding, ads ] = await prisma.$transaction([
         prisma.eventBranding.findUnique({
             where: {
                 eventId
@@ -18,7 +18,7 @@ eventBrandingRouter.get('/:eventId', async (req: Request, res: Response) => {
             }
         })
     ]);
-    res.json(resWrap({ event, ads }));
+    res.json(resWrap({ branding, ads }));
 });
 
 eventBrandingRouter.put('/:eventId', async (req: Request, res: Response) => {

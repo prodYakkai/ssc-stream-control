@@ -14,7 +14,7 @@ import { NextFunction, Request, Response } from 'express';
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (req.session.user === undefined) {
+        if (req.user === undefined) {
             reject(res);
             return;
         }
@@ -30,12 +30,12 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        if (req.session.user === undefined) {
+        if (req.user === undefined) {
             reject(res);
             return;
         }
 
-        if (!req.session.user.isAdmin) {
+        if (!req.user.isAdmin) {
             reject(res);
             return;
         }

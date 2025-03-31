@@ -5,5 +5,4 @@ export const environment = {
     host: 'localhost',
     src: 'localhost',
   },
-  googleClientId: '365941463067-uriifplv9h8jobq6e2dv7v07ello9g7h.apps.googleusercontent.com',
 };

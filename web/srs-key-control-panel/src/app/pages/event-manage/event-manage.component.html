@@ -58,9 +58,9 @@
         </td>
         <td>
           <span *ngIf="currentEventId === data.id">Current Event</span>
-          <a (click)="setCurrentEvent(data.id)" *ngIf="currentEventId !== data.id">Set as Current Event</a>
+          <a (click)="setCurrentEvent(data.id)" *ngIf="currentEventId !== data.id && !data.archived">Set as Current Event</a>
           <nz-divider nzType="vertical"></nz-divider>
-          <a nz-button nzDanger nzType="primary">Delete</a>
+          <a nz-button nzDanger nzType="primary" [disabled]="basicTable.data.length <= 1" (click)="deleteEvent(data.id)">Delete</a>
         </td>
       </tr>
     </tbody>

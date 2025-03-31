@@ -10,18 +10,18 @@
  * 
  */
 
-export const PlayerHost = 'https://play.blackcompany.tv';
+export const PlayerHost = 'https://play.offkai.tech';
 
 export const MasterSheetShareList = [
     {
         name: 'AV Group',
-        email: 'av@dev.blackcompany.tv',
+        email: 'av@offkaiexpo.com',
         isGroup: true,
         role: 'reader',
     },
     {
         name: 'IT Group',
-        email: 'it@dev.blackcompany.tv',
+        email: 'it@offkaiexpo.com',
         isGroup: true,
         role: 'reader',
     },
@@ -36,4 +36,20 @@ export const GoogleAuthScopes = [
     'openid',
     'profile',
     'email'
+];
+
+export const OpenIDEndpoint = {
+    authorization_endpoint: 'https://sso.offkaiexpo.com/application/o/authorize/',
+    token_endpoint: 'https://sso.offkaiexpo.com/application/o/token/',
+    userinfo_endpoint: 'https://sso.offkaiexpo.com/application/o/userinfo/',
+};
+
+export const CORS_ORIGIN_DEV = [
+    'http://localhost:4200',
+    'http://localhost:5200',
+];
+
+export const CORS_ORIGIN_PROD = [
+    'https://keypanel.offkai.tech',
+    'https://play.offkai.tech',
 ];

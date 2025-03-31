@@ -13,7 +13,7 @@
 
 import { SrsService } from '../services/SrsService';
 import { SrsPublish } from '../types/SrsPublish';
-import sha256 from 'sha256';
+import { createHash } from 'crypto';
 import dayjs from 'dayjs';
 import {  StreamURLFlattenParams } from '../utils/urlConstruct';
 import { prisma } from '..';
@@ -63,9 +63,9 @@ export const SrsPlayHandler = async (
   let computedHash = '';
   console.log(parsedParams.key);
 
-  computedHash = sha256(
+  computedHash = createHash('sha256').update(
     `${process.env.FEED_HMAC_KEY}.${parsedParams.start}.${parsedParams.expire}.${parsedParams.key}`,
-  );
+  ).digest('hex');
 
 
   // compare the hmac

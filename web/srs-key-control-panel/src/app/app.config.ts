@@ -24,8 +24,6 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { KeyService } from './services/key.service';
 import { CategoryService } from './services/category.service';
 import { authInterceptor } from './interceptors/auth.interceptor';
-// import { SocialAuthServiceConfig, GoogleLoginProvider } from '@abacritt/angularx-social-login';
-// import { environment } from '../environments/environment';
 import { SrsService } from './services/srs.service';
 
 registerLocaleData(en);
@@ -41,29 +39,5 @@ export const appConfig: ApplicationConfig = {
     KeyService,
     CategoryService,
     SrsService,
-    // {
-    //   provide: 'SocialAuthServiceConfig',
-    //   useValue: {
-    //     autoLogin: false,
-    //     providers: [
-    //       {
-    //         id: GoogleLoginProvider.PROVIDER_ID,
-    //         provider: new GoogleLoginProvider(environment.googleClientId,
-    //           {
-    //             oneTapEnabled: false,
-    //             scopes: [
-    //               'https://apps-apis.google.com/a/feeds/groups/',
-    //               'https://www.googleapis.com/auth/groups',
-    //               'openid',
-    //             ]
-    //           }
-    //         ),
-    //       },
-    //     ],
-    //     onError: (error) => {
-    //       console.error(error);
-    //     }
-    //   } as SocialAuthServiceConfig,
-    // },
   ],
 };

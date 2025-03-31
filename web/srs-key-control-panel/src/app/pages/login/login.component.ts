@@ -29,35 +29,22 @@ export class LoginComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private messageService: NzMessageService
-  ) {}
+  ) { }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void { }
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      if (Object.keys(params).length === 0) {
-        return;
-      }
-      console.log(params);
-      this.isLoading = true;
-      this.router.navigate([], {
-        queryParams: {},
-        queryParamsHandling: 'merge',
-      })
-      this.authService.callback(params).subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.messageService.success('Login successful');
-          this.authService.authStateChange(true);
-          this.router.navigate(['/']);
-        },
-        error: (err) => {
-          console.error(err);
-          this.authService.authStateChange(false);
-          this.messageService.error('Login failed, ' + err.error.message);
-          this.isLoading = false;
-        },
-      });
-    });
+  ngOnInit(): void { }
+
+  handleLoginSuccess = ()=> {
+    this.isLoading = false;
+    this.messageService.success('Login successful');
+    this.authService.authStateChange(true);
+    this.router.navigate(['/']);
+  }
+
+  handleLoginFail(){
+    this.isLoading = false;
+    this.messageService.error('Login failed');
+    this.authService.authStateChange(false);
   }
 }

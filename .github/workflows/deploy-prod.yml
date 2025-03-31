@@ -9,7 +9,7 @@ on:
 # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: prodyakkai/ssc-api
+  IMAGE_NAME: offkai/ssc-api
 
 # There is a single job in this workflow. It's configured to run on the latest available version of Ubuntu.
 jobs:
@@ -49,12 +49,54 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      
-      # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see "[AUTOTITLE](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)." 
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
+  
+  deploy-webapp:
+    defaults:
+      run:
+        working-directory: './web/srs-key-control-panel'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: 'Az CLI login'
+        uses: azure/login@v2
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
-      
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Copy files
+        run: mv ./dist/srs-key-control-panel/browser/* ./dist/srs-key-control-panel/
+        
+      - name: Delete old files
+        run: az storage blob delete-batch --account-name ${{ vars.BLOB_ACCOUNT_NAME }} -s '$web' --pattern '*' --debug
+
+      - name: Upload to blob storage
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+              az storage blob upload-batch --account-name ${{ vars.BLOB_ACCOUNT_NAME }} -d '$web' -s $GITHUB_WORKSPACE/web/srs-key-control-panel/dist/srs-key-control-panel/ --debug --overwrite
+
+      - name: Purge CDN endpoint
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+             az cdn endpoint purge --content-paths  "/*" --profile-name "${{ vars.CDN_PROFILE_NAME }}" --name "${{ vars.CDN_NAME }}" --resource-group "telepresence"
+  

@@ -22,19 +22,21 @@ import logger from 'morgan';
 import cors from 'cors';
 import proxy from 'express-http-proxy';
 import baseRouter from './routes';
-import { GoogleAuth } from 'google-auth-library';
-import { google } from 'googleapis';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth } from './middlewares/guard';
 import crypto from 'crypto';
-import { RedisStore } from 'connect-redis';
-import Redis from 'ioredis';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import resWrap from './utils/responseWrapper';
+import passport from 'passport';
+import { google } from 'googleapis';
+import { CORS_ORIGIN_DEV, CORS_ORIGIN_PROD } from './constants';
+
 
 export const app = express();
 export const srsApiAuthToken = Buffer.from(
   `apiuser:${process.env.SRS_API_TOKEN || ''}`,
 ).toString('base64');
-export const serviceAccountGAuth = new GoogleAuth({
+export const serviceAccountGAuth = new google.auth.GoogleAuth({
   scopes: [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive.file',
@@ -42,12 +44,7 @@ export const serviceAccountGAuth = new GoogleAuth({
   ],
 });
 export const prisma = new PrismaClient();
-export const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-export const gOauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.CONTROL_ENDPOINT + '/login',
-)
+
 
 const sessionSetting: session.SessionOptions = {
   secret: process.env.FEED_HMAC_KEY || crypto.randomBytes(32).toString('hex'),
@@ -56,7 +53,14 @@ const sessionSetting: session.SessionOptions = {
   },
   saveUninitialized: false,
   resave: false,
-  store: new RedisStore({ client: redis, prefix: 'api:' }),
+  store: new PrismaSessionStore(
+    prisma,
+    {
+      checkPeriod: 5 * 60 * 1000, // ms
+      dbRecordIdIsSessionId: true,
+      dbRecordIdFunction: undefined,
+    },
+  ),
 }
 
 if (app.get('env') === 'production') {
@@ -71,15 +75,15 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
 app.use(cors({
   credentials: true,
-  origin: [
-    'http://localhost:3005',
-    'https://control.blackcompany.tv',
-    'https://play.blackcompany.tv',
-  ]
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  origin: process.env.NODE_ENV === 'production' ? CORS_ORIGIN_PROD : CORS_ORIGIN_DEV
 }));
+
 app.use(session(sessionSetting));
+
 app.use(
   '/srs-proxy',
   requireAuth,
@@ -107,6 +111,7 @@ app.use(
     },
   }),
 );
+app.use(passport.authenticate('session'));
 app.use(baseRouter);
 
 // error handler
@@ -120,11 +125,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // respond with error
-  res.status(500);
-  res.json({
-    message: err.message,
-    code: -1,
-  });
+  res.status(500).send(resWrap({}, 1, err.message));
 });
 
 app.listen(process.env.PORT || 3005, async () => {
@@ -133,17 +134,19 @@ app.listen(process.env.PORT || 3005, async () => {
 ⭐️ Happy coding!`);
 });
 
-redis.on('error', (err) => {
-  console.error('Redis error', err);
-  process.exit(1);
-});
-
-redis.on('connect', () => {
-  console.log('Redis connected');
-});
-
 process.on('exit', async () => {
   console.log('Cleaning up...');
   await prisma.$disconnect();
-  await redis.disconnect();
+});
+
+passport.serializeUser((user, done) => {
+  process.nextTick(() => {
+      done(null, user);
+  });
+});
+passport.deserializeUser((user, cb) => {
+  process.nextTick(() => {
+      // @ts-expect-error ts is weird, just inject the user
+      cb(null, user);
+  });
 });

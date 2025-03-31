@@ -22,16 +22,6 @@ export class AuthService {
       }
     });
   }
-
-  callback(oauthObj: unknown) {
-    return this.http.get(`${environment.apiHost}/auth/callback`, {
-      params: oauthObj as unknown as { [key: string]: string },
-      withCredentials: true,
-      headers: {
-        'Authorization': 'Bearer callback'
-      }
-    });
-  }
   
   signout() {
     return window.location.replace(`${environment.apiHost}/auth/logout?redirect=${window.location.origin}`);
