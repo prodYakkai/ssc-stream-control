@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Install app dependencies
 COPY package.json yarn.lock ./
+RUN apk add --no-cache openssl
 
 RUN yarn install --frozen-lockfile
 
@@ -16,6 +17,7 @@ RUN yarn build
 
 FROM node:22.14.0-alpine
 
+RUN apk add --no-cache openssl
 ENV NODE_ENV production
 USER node
 
