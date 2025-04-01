@@ -5,8 +5,7 @@ on:
     branches: [ "main", "devel" ]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: offkai/ssc-api
+  IMAGE_NAME: ssc-api
 
 jobs:
   build-and-push-image:
